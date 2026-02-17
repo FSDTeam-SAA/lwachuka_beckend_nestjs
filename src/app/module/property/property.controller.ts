@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  Req,
+} from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
-import { UpdatePropertyDto } from './dto/update-property.dto';
+import { AuthGuard } from 'src/app/middlewares/auth.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { fileUpload } from 'src/app/helper/fileUploder';
+import type { Request } from 'express';
 
 @Controller('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
-  create(@Body() createPropertyDto: CreatePropertyDto) {
-    return this.propertyService.create(createPropertyDto);
-  }
+  @UseGuards(AuthGuard('agent', 'seller', 'vendor', 'admin'))
+  @UseInterceptors(FilesInterceptor('images', 10, fileUpload.uploadConfig))
+  async createProperty(
+    @Req() req: Request,
+    @Body() createPropertyDto: CreatePropertyDto,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
+    const userId = req.user!.id;
 
-  @Get()
-  findAll() {
-    return this.propertyService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.propertyService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto) {
-    return this.propertyService.update(+id, updatePropertyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.propertyService.remove(+id);
+    return this.propertyService.createProperty(
+      userId,
+      createPropertyDto,
+      files,
+    );
   }
 }
