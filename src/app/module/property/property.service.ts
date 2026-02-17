@@ -7,6 +7,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../user/entities/user.entity';
 import { fileUpload } from 'src/app/helper/fileUploder';
 import { getLatLngFromAddress } from 'src/app/helper/geocode';
+import { IFilterParams } from 'src/app/helper/pick';
+import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
 
 @Injectable()
 export class PropertyService {
@@ -54,6 +56,82 @@ export class PropertyService {
       lng: lng ?? undefined,
     });
 
+    return property;
+  }
+
+  async getAllProperty(params: IFilterParams, options: IOptions) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andCondition: any[] = [];
+    const searchAbleFields = [
+      'title',
+      'listingType',
+      'propertyType',
+      'kitchenType',
+      'location',
+      'finishes',
+      'balconyType',
+      'storage',
+      'coolingSystem',
+      'moveInStatus',
+      'description',
+      'propertyCommunityAmenities',
+      'purpose',
+      'referenceNumber',
+    ];
+
+    if (searchTerm) {
+      andCondition.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andCondition.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    const whereConditions =
+      andCondition.length > 0 ? { $and: andCondition } : {};
+
+    const result = await this.userModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit);
+    const total = await this.userModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
+  }
+
+  async getSingleProperty(id: string) {
+    const property = await this.propertyModel.findById(id);
+    if (!property) throw new HttpException('Property not found', 404);
+
+    return property;
+  }
+
+  async updateProperty() {}
+
+  async deleteProperty(id: string) {
+    const property = await this.propertyModel.findByIdAndDelete(id);
+    if (!property) throw new HttpException('Property not found', 404);
     return property;
   }
 }
