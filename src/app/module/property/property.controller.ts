@@ -18,6 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { fileUpload } from 'src/app/helper/fileUploder';
 import type { Request } from 'express';
 import pick from 'src/app/helper/pick';
+import { UpdatePropertyDto } from './dto/update-property.dto';
 
 @Controller('property')
 export class PropertyController {
@@ -84,7 +85,7 @@ export class PropertyController {
   async updateProperty(
     @Req() req: Request,
     @Param('id') id: string,
-    @Body() updatePropertyDto: CreatePropertyDto,
+    @Body() updatePropertyDto: UpdatePropertyDto,
   ) {
     const userId = req.user!.id;
     const result = await this.propertyService.updateProperty(
