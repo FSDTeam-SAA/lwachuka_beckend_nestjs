@@ -7,6 +7,9 @@ import {
   UploadedFiles,
   Req,
   Get,
+  Param,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
@@ -56,11 +59,54 @@ export class PropertyController {
       'purpose',
       'referenceNumber',
     ]);
-    const options = pick(req.query, ['page', 'limit']);
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllProperty(filters, options);
 
     return {
       message: 'All property retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
+  }
+
+  @Get(':id')
+  async getSingleProperty(@Param('id') id: string) {
+    const result = await this.propertyService.getSingleProperty(id);
+
+    return {
+      message: 'Property retrieved successfully',
+      data: result,
+    };
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard('vendor', 'admin'))
+  async updateProperty(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() updatePropertyDto: CreatePropertyDto,
+  ) {
+    const userId = req.user!.id;
+    const result = await this.propertyService.updateProperty(
+      userId,
+      id,
+      updatePropertyDto,
+    );
+
+    return {
+      message: 'Property updated successfully',
+      data: result,
+    };
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('vendor', 'admin'))
+  async deleteProperty(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user!.id;
+    const result = await this.propertyService.deleteProperty(userId, id);
+
+    return {
+      message: 'Property deleted successfully',
       data: result,
     };
   }
