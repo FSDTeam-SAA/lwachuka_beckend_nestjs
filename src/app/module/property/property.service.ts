@@ -61,6 +61,7 @@ export class PropertyService {
 
   async getAllProperty(params: IFilterParams, options: IOptions) {
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+
     const { searchTerm, ...filterData } = params;
 
     const andCondition: any[] = [];
@@ -103,12 +104,12 @@ export class PropertyService {
     const whereConditions =
       andCondition.length > 0 ? { $and: andCondition } : {};
 
-    const result = await this.userModel
+    const result = await this.propertyModel
       .find(whereConditions)
       .sort({ [sortBy]: sortOrder } as any)
       .skip(skip)
       .limit(limit);
-    const total = await this.userModel.countDocuments(whereConditions);
+    const total = await this.propertyModel.countDocuments(whereConditions);
 
     return {
       data: result,
@@ -127,11 +128,58 @@ export class PropertyService {
     return property;
   }
 
-  async updateProperty() {}
+  async updateProperty(
+    userId: string,
+    id: string,
+    payload: UpdatePropertyDto,
+    files?: Express.Multer.File[],
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new HttpException('User not found', 404);
+    const property = await this.propertyModel.findById(id);
 
-  async deleteProperty(id: string) {
-    const property = await this.propertyModel.findByIdAndDelete(id);
     if (!property) throw new HttpException('Property not found', 404);
-    return property;
+
+    if (user.role !== 'admin') {
+      if (property.createBy.toString() !== user._id.toString()) {
+        throw new HttpException(
+          'You are not allow to update this property',
+          403,
+        );
+      }
+    }
+
+    if (files?.length) {
+      const properityImage = await Promise.all(
+        files.map((file) => fileUpload.uploadToCloudinary(file)),
+      );
+      payload.images = properityImage.map((img) => img.url);
+    }
+
+    const result = await this.propertyModel.findByIdAndUpdate(
+      id,
+      { ...payload },
+      { new: true, runValidators: true },
+    );
+    return result;
+  }
+
+  async deleteProperty(userId: string, id: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new HttpException('User not found', 404);
+    const property = await this.propertyModel.findById(id);
+
+    if (!property) throw new HttpException('Property not found', 404);
+
+    if (user.role !== 'admin') {
+      if (property.createBy.toString() !== user._id.toString()) {
+        throw new HttpException(
+          'You are not allow to update this property',
+          403,
+        );
+      }
+    }
+    const result = await this.propertyModel.findByIdAndDelete(id);
+    return result;
   }
 }
