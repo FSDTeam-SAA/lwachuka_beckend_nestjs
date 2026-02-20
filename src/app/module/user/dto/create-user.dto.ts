@@ -1,6 +1,9 @@
 import {
+  IsBoolean,
+  IsDate,
   IsEmail,
   IsEnum,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -64,4 +67,16 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   stripeAccountId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isSubscribed?: boolean;
+
+  @IsMongoId()
+  @IsOptional()
+  subscribers?: string;
+
+  @IsDate()
+  @IsOptional()
+  subscriptionEndDate?: Date;
 }

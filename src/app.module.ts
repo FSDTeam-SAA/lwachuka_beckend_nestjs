@@ -6,6 +6,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './app/module/user/user.module';
 import { AuthModule } from './app/module/auth/auth.module';
 import { PropertyModule } from './app/module/property/property.module';
+import { SubscriberModule } from './app/module/subscriber/subscriber.module';
+import { PaymentModule } from './app/module/payment/payment.module';
+import { WebhookModule } from './app/module/webhook/webhook.module';
 import config from './app/config';
 
 @Module({
@@ -15,6 +18,9 @@ import config from './app/config';
     UserModule,
     AuthModule,
     PropertyModule,
+    SubscriberModule,
+    PaymentModule,
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [AppService],

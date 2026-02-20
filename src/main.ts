@@ -6,6 +6,7 @@ import config from './app/config';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from './app/helper/globalErrorHandler';
 import { UtilsInterceptor } from './app/utils/utils.interceptor';
+import express from 'express';
 dotenv.config();
 
 const port = config.port;
@@ -14,12 +15,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'debug'],
   });
+  app.use('/api/v1/webhook', express.raw({ type: 'application/json' }));
 
   app.enableCors({ origin: '*', credentials: true });
   app.setGlobalPrefix('api/v1', {
     exclude: [''],
   });
   app.use(cookieParser());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

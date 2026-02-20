@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 import config from 'src/app/config';
 
@@ -62,6 +62,15 @@ export class User {
 
   @Prop()
   stripeAccountId: string;
+
+  @Prop()
+  isSubscribed: boolean;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' })
+  subscribers: mongoose.Types.ObjectId;
+
+  @Prop()
+  subscriptionEndDate: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

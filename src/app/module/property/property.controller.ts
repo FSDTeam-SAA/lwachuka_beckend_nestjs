@@ -10,6 +10,8 @@ import {
   Param,
   Put,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
@@ -25,6 +27,7 @@ export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard('agent', 'seller', 'vendor', 'admin'))
   @UseInterceptors(FilesInterceptor('images', 10, fileUpload.uploadConfig))
   async createProperty(
@@ -34,14 +37,19 @@ export class PropertyController {
   ) {
     const userId = req.user!.id;
 
-    return this.propertyService.createProperty(
+    const result = await this.propertyService.createProperty(
       userId,
       createPropertyDto,
       files,
     );
+    return {
+      message: 'Property created successfully',
+      data: result,
+    };
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   async getAllProperties(@Req() req: Request) {
     const filters = pick(req.query, [
       'searchTerm',
@@ -71,6 +79,7 @@ export class PropertyController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async getSingleProperty(@Param('id') id: string) {
     const result = await this.propertyService.getSingleProperty(id);
 
@@ -81,6 +90,7 @@ export class PropertyController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('vendor', 'admin'))
   async updateProperty(
     @Req() req: Request,
@@ -101,6 +111,7 @@ export class PropertyController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('vendor', 'admin'))
   async deleteProperty(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user!.id;
