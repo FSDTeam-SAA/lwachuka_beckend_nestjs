@@ -1,42 +1,72 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
+  HttpCode,
+  HttpStatus,
   Param,
-  Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import pick from 'src/app/helper/pick';
+import type { Request } from 'express';
+import { AuthGuard } from 'src/app/middlewares/auth.guard';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('admin'))
+  async getAllPayments(@Req() req: Request) {
+    const query = req.query;
+    const filters = pick(query, [
+      'searchTerm',
+      'currency',
+      'status',
+      'paymentType',
+    ]);
+    const options = pick(query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await this.paymentService.getAllPayments(filters, options);
+    return {
+      message: 'All payments retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
   }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
+  @Get('my')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('vendor'))
+  async getMyPayments(@Req() req: Request) {
+    const query = req.query;
+    const filters = pick(query, [
+      'searchTerm',
+      'currency',
+      'status',
+      'paymentType',
+    ]);
+    const options = pick(query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await this.paymentService.getMyPayments(
+      req.user!.id,
+      filters,
+      options,
+    );
+    return {
+      message: 'All payments retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+  @HttpCode(HttpStatus.OK)
+  async getSinglePayment(@Param('id') id: string) {
+    const result = await this.paymentService.getSinglePayment(id);
+    return {
+      message: 'Payment retrieved successfully',
+      data: result,
+    };
   }
 }

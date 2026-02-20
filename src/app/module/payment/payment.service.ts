@@ -1,26 +1,121 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Payment, PaymentDocument } from './entities/payment.entity';
+import mongoose from 'mongoose';
+import { IFilterParams } from 'src/app/helper/pick';
+import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
 
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto: CreatePaymentDto) {
-    return 'This action adds a new payment';
+  constructor(
+    @InjectModel(Payment.name)
+    private readonly paymentModel: mongoose.Model<PaymentDocument>,
+  ) {}
+
+  async getAllPayments(params: IFilterParams, options: IOptions) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andCondition: any[] = [];
+    const searchAbleFields = ['currency', 'status', 'paymentType'];
+
+    if (searchTerm) {
+      andCondition.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andCondition.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    const whereConditions =
+      andCondition.length > 0 ? { $and: andCondition } : {};
+
+    const result = await this.paymentModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit);
+    const total = await this.paymentModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
   }
 
-  findAll() {
-    return `This action returns all payment`;
+  async getMyPayments(
+    userId: string,
+    params: IFilterParams,
+    options: IOptions,
+  ) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andCondition: any[] = [];
+    const searchAbleFields = ['currency', 'status', 'paymentType'];
+
+    if (searchTerm) {
+      andCondition.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andCondition.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+    andCondition.push({
+      user: userId,
+    });
+
+    const whereConditions =
+      andCondition.length > 0 ? { $and: andCondition } : {};
+
+    const result = await this.paymentModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit);
+    const total = await this.paymentModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
+  async getSinglePayment(id: string) {
+    const result = await this.paymentModel.findById(id);
+    return {
+      message: 'Payment retrieved successfully',
+      data: result,
+    };
   }
 }
