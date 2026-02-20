@@ -17,8 +17,6 @@ export class Subscriber {
   @Prop({ required: true })
   features: string[];
 
- 
-
   @Prop({ enum: ['active', 'inactive'], default: 'active' })
   status: string;
 
