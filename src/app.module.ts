@@ -11,6 +11,7 @@ import { PaymentModule } from './app/module/payment/payment.module';
 import { WebhookModule } from './app/module/webhook/webhook.module';
 import { CalenderModule } from './app/module/calender/calender.module';
 import { BookmarkModule } from './app/module/bookmark/bookmark.module';
+import { ContactModule } from './app/module/contact/contact.module';
 import config from './app/config';
 
 @Module({
@@ -25,6 +26,7 @@ import config from './app/config';
     WebhookModule,
     CalenderModule,
     BookmarkModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
