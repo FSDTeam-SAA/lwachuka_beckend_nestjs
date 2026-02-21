@@ -10,6 +10,7 @@ import { SubscriberModule } from './app/module/subscriber/subscriber.module';
 import { PaymentModule } from './app/module/payment/payment.module';
 import { WebhookModule } from './app/module/webhook/webhook.module';
 import { CalenderModule } from './app/module/calender/calender.module';
+import { BookmarkModule } from './app/module/bookmark/bookmark.module';
 import config from './app/config';
 
 @Module({
@@ -23,6 +24,7 @@ import config from './app/config';
     PaymentModule,
     WebhookModule,
     CalenderModule,
+    BookmarkModule,
   ],
   controllers: [AppController],
   providers: [AppService],

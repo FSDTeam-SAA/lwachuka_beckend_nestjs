@@ -78,6 +78,40 @@ export class PropertyController {
     };
   }
 
+  @Get('user/:userId')
+  @HttpCode(HttpStatus.OK)
+  async userProperty(@Req() req: Request, @Param('userId') userId: string) {
+    const filters = pick(req.query, [
+      'searchTerm',
+      'title',
+      'listingType',
+      'propertyType',
+      'kitchenType',
+      'location',
+      'finishes',
+      'balconyType',
+      'storage',
+      'coolingSystem',
+      'moveInStatus',
+      'description',
+      'propertyCommunityAmenities',
+      'purpose',
+      'referenceNumber',
+    ]);
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await this.propertyService.userProperty(
+      userId,
+      filters,
+      options,
+    );
+
+    return {
+      message: 'User property retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getSingleProperty(@Param('id') id: string) {

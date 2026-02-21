@@ -111,4 +111,8 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsDateString()
   handoverDate?: Date;
+
+  @IsOptional()
+  @IsArray()
+  bookmarkUser?: string[];
 }

@@ -108,6 +108,9 @@ export class Property {
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
   listingUser: mongoose.Types.ObjectId[];
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
+  bookmarkUser: mongoose.Types.ObjectId[];
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property);

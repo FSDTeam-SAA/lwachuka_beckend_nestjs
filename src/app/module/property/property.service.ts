@@ -182,4 +182,70 @@ export class PropertyService {
     const result = await this.propertyModel.findByIdAndDelete(id);
     return result;
   }
+
+  async userProperty(userId: string, params: IFilterParams, options: IOptions) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new HttpException('User not found', 404);
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+
+    const { searchTerm, ...filterData } = params;
+
+    const andCondition: any[] = [];
+    const searchAbleFields = [
+      'title',
+      'listingType',
+      'propertyType',
+      'kitchenType',
+      'location',
+      'finishes',
+      'balconyType',
+      'storage',
+      'coolingSystem',
+      'moveInStatus',
+      'description',
+      'propertyCommunityAmenities',
+      'purpose',
+      'referenceNumber',
+    ];
+
+    if (searchTerm) {
+      andCondition.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andCondition.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    andCondition.push({ createBy: user._id });
+
+    const whereConditions =
+      andCondition.length > 0 ? { $and: andCondition } : {};
+
+    const result = await this.propertyModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit);
+    const total = await this.propertyModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
+  }
 }
