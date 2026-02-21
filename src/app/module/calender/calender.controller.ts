@@ -8,12 +8,15 @@ import {
   Req,
   Param,
   Get,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { CreateCalenderDto } from './dto/create-calender.dto';
 import { AuthGuard } from 'src/app/middlewares/auth.guard';
 import type { Request } from 'express';
 import pick from 'src/app/helper/pick';
+import { UpdateCalenderDto } from './dto/update-calender.dto';
 
 @Controller('calender')
 export class CalenderController {
@@ -93,6 +96,51 @@ export class CalenderController {
       message: 'Calender retrieved successfully',
       meta: result.meta,
       data: result.data,
+    };
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard('user'))
+  @HttpCode(HttpStatus.OK)
+  async updateCalender(
+    @Req() req: Request,
+    @Body() updateCalenderDto: UpdateCalenderDto,
+    @Param('id') id: string,
+  ) {
+    const userId = req.user!.id;
+    const result = await this.calenderService.updateCalender(
+      userId,
+      id,
+      updateCalenderDto,
+    );
+
+    return {
+      message: 'Calender updated successfully',
+      data: result,
+    };
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getMyCalenderById(@Param('id') id: string) {
+    const result = await this.calenderService.getMyCalenderById(id);
+
+    return {
+      message: 'Calender retrieved successfully',
+      data: result,
+    };
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('user'))
+  @HttpCode(HttpStatus.OK)
+  async deleteCalender(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user!.id;
+    const result = await this.calenderService.deleteCalender(userId, id);
+
+    return {
+      message: 'Calender deleted successfully',
+      data: result,
     };
   }
 }

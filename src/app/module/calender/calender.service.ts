@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCalenderDto } from './dto/create-calender.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Calender, CalenderDocument } from './entities/calender.entity';
@@ -10,6 +10,7 @@ import {
 import { User, UserDocument } from '../user/entities/user.entity';
 import { IFilterParams } from 'src/app/helper/pick';
 import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
+import { UpdateCalenderDto } from './dto/update-calender.dto';
 
 @Injectable()
 export class CalenderService {
@@ -187,5 +188,65 @@ export class CalenderService {
         total,
       },
     };
+  }
+
+  async getMyCalenderById(id: string) {
+    const calender = await this.calenderModel.findById(id);
+    if (!calender) {
+      throw new HttpException('Calender not found', HttpStatus.NOT_FOUND);
+    }
+    return calender;
+  }
+
+  async updateCalender(
+    userId: string,
+    id: string,
+    updateCalenderDto: UpdateCalenderDto,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const calender = await this.calenderModel.findById(id);
+    if (!calender) {
+      throw new HttpException('Calender not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (calender.user.toString() !== user._id.toString()) {
+      throw new HttpException(
+        'You are not authorized to update this calender',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const result = await this.calenderModel.findByIdAndUpdate(
+      id,
+      updateCalenderDto,
+      { new: true },
+    );
+    return result;
+  }
+
+  async deleteCalender(userId: string, id: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const calender = await this.calenderModel.findById(id);
+    if (!calender) {
+      throw new HttpException('Calender not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (calender.user.toString() !== user._id.toString()) {
+      throw new HttpException(
+        'You are not authorized to delete this calender',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const result = await this.calenderModel.findByIdAndDelete(id);
+    return result;
   }
 }
