@@ -9,6 +9,7 @@ import { PropertyModule } from './app/module/property/property.module';
 import { SubscriberModule } from './app/module/subscriber/subscriber.module';
 import { PaymentModule } from './app/module/payment/payment.module';
 import { WebhookModule } from './app/module/webhook/webhook.module';
+import { CalenderModule } from './app/module/calender/calender.module';
 import config from './app/config';
 
 @Module({
@@ -21,6 +22,7 @@ import config from './app/config';
     SubscriberModule,
     PaymentModule,
     WebhookModule,
+    CalenderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,191 @@
+import { Injectable } from '@nestjs/common';
+import { CreateCalenderDto } from './dto/create-calender.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Calender, CalenderDocument } from './entities/calender.entity';
+import { Model } from 'mongoose';
+import {
+  Property,
+  PropertyDocument,
+} from '../property/entities/property.entity';
+import { User, UserDocument } from '../user/entities/user.entity';
+import { IFilterParams } from 'src/app/helper/pick';
+import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
+
+@Injectable()
+export class CalenderService {
+  constructor(
+    @InjectModel(Calender.name)
+    private calenderModel: Model<CalenderDocument>,
+
+    @InjectModel(Property.name)
+    private propertyModel: Model<PropertyDocument>,
+
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
+  ) {}
+
+  async createCalender(
+    userId: string,
+    createCalenderDto: CreateCalenderDto,
+    propertyId: string,
+  ) {
+    const user = await this.userModel.findById(userId);
+    const property = await this.propertyModel.findById(propertyId);
+    if (!user || !property) {
+      throw new Error('User or property not found');
+    }
+    const result = await this.calenderModel.create({
+      ...createCalenderDto,
+      user: user._id,
+      property: property._id,
+    });
+    return result;
+  }
+
+  async getMyBookCalender(
+    userId: string,
+    params: IFilterParams,
+    options: IOptions,
+  ) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andConditions: any[] = [];
+
+    const searchAbleFields = [
+      'firstName',
+      'lastName',
+      'email',
+      'customMessage',
+      'phone',
+    ];
+
+    if (searchTerm) {
+      andConditions.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andConditions.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    andConditions.push({
+      user: userId,
+    });
+
+    const whereConditions =
+      andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const result = await this.calenderModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: 'property',
+        select: 'title images location',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName email phone',
+      });
+    const total = await this.calenderModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
+  }
+
+  async getMyVendorBookCalender(
+    userId: string,
+    params: IFilterParams,
+    options: IOptions,
+  ) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const vendor = await this.userModel.findById(userId);
+    if (!vendor) {
+      throw new Error('Vendor not found');
+    }
+
+    const properties = await this.propertyModel.find({
+      createBy: vendor._id,
+    });
+
+    const andConditions: any[] = [];
+
+    const searchAbleFields = [
+      'firstName',
+      'lastName',
+      'email',
+      'customMessage',
+      'phone',
+    ];
+
+    if (searchTerm) {
+      andConditions.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: {
+            $regex: searchTerm,
+            $options: 'i',
+          },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andConditions.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    andConditions.push({
+      property: { $in: properties.map((property) => property._id) },
+    });
+
+    const whereConditions =
+      andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const result = await this.calenderModel
+      .find(whereConditions)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: 'property',
+        select: 'title images location',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName email phone',
+      });
+    const total = await this.calenderModel.countDocuments(whereConditions);
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
+  }
+}
