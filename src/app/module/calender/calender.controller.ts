@@ -71,10 +71,10 @@ export class CalenderController {
     };
   }
 
-  @Get('my-vendor-bookings')
-  @UseGuards(AuthGuard('vendor'))
+  @Get('my-agent-bookings')
+  @UseGuards(AuthGuard('agent'))
   @HttpCode(HttpStatus.OK)
-  async getMyVendorBookCalender(@Req() req: Request) {
+  async getMyAgentBookCalender(@Req() req: Request) {
     const userId = req.user!.id;
     const filters = pick(req.query, [
       'searchTerm',
@@ -86,7 +86,7 @@ export class CalenderController {
       'phone',
     ]);
     const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-    const result = await this.calenderService.getMyVendorBookCalender(
+    const result = await this.calenderService.getMyAgentBookCalender(
       userId,
       filters,
       options,
