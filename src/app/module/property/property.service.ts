@@ -183,7 +183,11 @@ export class PropertyService {
     return result;
   }
 
-  async userProperty(userId: string, params: IFilterParams, options: IOptions) {
+  async getMyAgentProperty(
+    userId: string,
+    params: IFilterParams,
+    options: IOptions,
+  ) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new HttpException('User not found', 404);
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
