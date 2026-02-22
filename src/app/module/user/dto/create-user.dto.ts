@@ -37,7 +37,7 @@ export class CreateUserDto {
   profileImage?: string;
 
   @IsOptional()
-  @IsEnum(['user', 'agent', 'seller', 'vendor', 'admin'])
+  @IsEnum(['user', 'agent', 'vendor', 'admin'])
   role?: string;
 
   @IsOptional()

@@ -78,9 +78,9 @@ export class PropertyController {
     };
   }
 
-  @Get('user/:userId')
+  @Get('agent/:agentId')
   @HttpCode(HttpStatus.OK)
-  async userProperty(@Req() req: Request, @Param('userId') userId: string) {
+  async agentProperty(@Req() req: Request, @Param('agentId') agentId: string) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
@@ -99,14 +99,14 @@ export class PropertyController {
       'referenceNumber',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-    const result = await this.propertyService.userProperty(
-      userId,
+    const result = await this.propertyService.getMyAgentProperty(
+      agentId,
       filters,
       options,
     );
 
     return {
-      message: 'User property retrieved successfully',
+      message: 'Agent property retrieved successfully',
       meta: result.meta,
       data: result.data,
     };

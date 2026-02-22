@@ -12,6 +12,7 @@ import { WebhookModule } from './app/module/webhook/webhook.module';
 import { CalenderModule } from './app/module/calender/calender.module';
 import { BookmarkModule } from './app/module/bookmark/bookmark.module';
 import { ContactModule } from './app/module/contact/contact.module';
+import { ContactpropretyModule } from './app/module/contactproprety/contactproprety.module';
 import config from './app/config';
 
 @Module({
@@ -27,6 +28,7 @@ import config from './app/config';
     CalenderModule,
     BookmarkModule,
     ContactModule,
+    ContactpropretyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
