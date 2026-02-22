@@ -112,7 +112,7 @@ export class CalenderService {
     };
   }
 
-  async getMyVendorBookCalender(
+  async getMyAgentBookCalender(
     userId: string,
     params: IFilterParams,
     options: IOptions,
@@ -120,13 +120,13 @@ export class CalenderService {
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
     const { searchTerm, ...filterData } = params;
 
-    const vendor = await this.userModel.findById(userId);
-    if (!vendor) {
-      throw new Error('Vendor not found');
+    const agent = await this.userModel.findById(userId);
+    if (!agent) {
+      throw new Error('Agent not found');
     }
 
     const properties = await this.propertyModel.find({
-      createBy: vendor._id,
+      createBy: agent._id,
     });
 
     const andConditions: any[] = [];
