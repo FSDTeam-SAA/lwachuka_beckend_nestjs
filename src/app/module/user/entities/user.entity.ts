@@ -22,7 +22,7 @@ export class User {
   profileImage: string;
 
   @Prop({
-    enum: ['user', 'agent', 'seller', 'vendor', 'admin'],
+    enum: ['user', 'agent', 'vendor', 'admin'],
     default: 'user',
   })
   role: string;
