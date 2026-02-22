@@ -1,34 +1,10 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsEnum,
-  IsOptional,
-  IsMongoId,
-  IsEmail,
-} from 'class-validator';
-import { Types } from 'mongoose';
+import { IsNotEmpty, IsString, IsMongoId } from 'class-validator';
 
 export class CreateContactpropretyDto {
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
-  @IsString()
-  phone: string;
+  @IsMongoId()
+  propertyOwnerId: string;
 
   @IsNotEmpty()
   @IsString()
   message: string;
-
-  @IsMongoId()
-  @IsOptional()
-  propertyId: Types.ObjectId;
-
-  @IsMongoId()
-  @IsOptional()
-  userId: Types.ObjectId;
-
-  @IsEnum(['pending', 'viewed', 'responded'], { message: 'Invalid status' })
-  @IsOptional()
-  status?: string;
 }
