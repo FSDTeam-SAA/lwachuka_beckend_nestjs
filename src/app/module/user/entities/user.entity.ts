@@ -51,6 +51,9 @@ export class User {
   @Prop()
   postCode: string;
 
+  @Prop({ enum: ['active', 'block', 'pending'], default: 'pending' })
+  status: string;
+
   @Prop()
   otp?: string;
 

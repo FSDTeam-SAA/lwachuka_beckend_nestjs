@@ -13,6 +13,7 @@ import { CalenderModule } from './app/module/calender/calender.module';
 import { BookmarkModule } from './app/module/bookmark/bookmark.module';
 import { ContactModule } from './app/module/contact/contact.module';
 import { ContactpropretyModule } from './app/module/contactproprety/contactproprety.module';
+import { AdvertisementmanagementModule } from './app/module/advertisementmanagement/advertisementmanagement.module';
 import config from './app/config';
 
 @Module({
@@ -29,6 +30,7 @@ import config from './app/config';
     BookmarkModule,
     ContactModule,
     ContactpropretyModule,
+    AdvertisementmanagementModule,
   ],
   controllers: [AppController],
   providers: [AppService],
