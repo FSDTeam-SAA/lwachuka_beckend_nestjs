@@ -1,6 +1,9 @@
 import {
+  IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
@@ -21,4 +24,8 @@ export class CreateAuthDto {
   @IsString()
   @IsNotEmpty({ message: 'Role is required' })
   role: string;
+
+  @IsEnum(['active', 'block', 'pending'])
+  @IsOptional()
+  status?: string;
 }

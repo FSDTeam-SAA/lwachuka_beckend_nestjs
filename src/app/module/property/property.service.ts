@@ -80,6 +80,7 @@ export class PropertyService {
       'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
+      'status',
     ];
 
     if (searchTerm) {
@@ -108,7 +109,8 @@ export class PropertyService {
       .find(whereConditions)
       .sort({ [sortBy]: sortOrder } as any)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .populate('createBy');
     const total = await this.propertyModel.countDocuments(whereConditions);
 
     return {
@@ -210,6 +212,7 @@ export class PropertyService {
       'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
+      'status',
     ];
 
     if (searchTerm) {
@@ -251,5 +254,22 @@ export class PropertyService {
         total,
       },
     };
+  }
+
+  async approvedOrReject(id: string, status: string) {
+    const property = await this.propertyModel.findById(id);
+    if (!property) throw new HttpException('Property not found', 404);
+
+    if (property.status === 'approved')
+      throw new HttpException('Property already approved', 400);
+    if (property.status === 'rejected')
+      throw new HttpException('Property already rejected', 400);
+
+    const result = await this.propertyModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true },
+    );
+    return result;
   }
 }

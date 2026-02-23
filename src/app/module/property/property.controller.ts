@@ -67,12 +67,49 @@ export class PropertyController {
       'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
+      'status',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllProperty(filters, options);
 
     return {
       message: 'All property retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
+  }
+
+  @Get('my-property')
+  @UseGuards(AuthGuard('agent', 'vendor'))
+  @HttpCode(HttpStatus.OK)
+  async getMyPropertys(@Req() req: Request) {
+    const filters = pick(req.query, [
+      'searchTerm',
+      'title',
+      'listingType',
+      'propertyType',
+      'kitchenType',
+      'location',
+      'finishes',
+      'balconyType',
+      'storage',
+      'coolingSystem',
+      'moveInStatus',
+      'description',
+      'propertyCommunityAmenities',
+      'purpose',
+      'referenceNumber',
+      'status',
+    ]);
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await this.propertyService.getMyAgentProperty(
+      req.user!.id,
+      filters,
+      options,
+    );
+
+    return {
+      message: 'Agent property retrieved successfully',
       meta: result.meta,
       data: result.data,
     };
@@ -97,6 +134,7 @@ export class PropertyController {
       'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
+      'status',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getMyAgentProperty(
@@ -109,6 +147,23 @@ export class PropertyController {
       message: 'Agent property retrieved successfully',
       meta: result.meta,
       data: result.data,
+    };
+  }
+
+  @Put('status/:propertyId')
+  @UseGuards(AuthGuard('admin'))
+  @HttpCode(HttpStatus.OK)
+  async approvedOrReject(
+    @Param('propertyId') propertyId: string,
+    @Body() updateStatus: { status: string },
+  ) {
+    const result = await this.propertyService.approvedOrReject(
+      propertyId,
+      updateStatus.status,
+    );
+    return {
+      message: `Property ${result?.status} successfully`,
+      data: result,
     };
   }
 

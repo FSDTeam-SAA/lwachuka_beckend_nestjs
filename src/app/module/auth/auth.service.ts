@@ -24,6 +24,10 @@ export class AuthService {
     const lastName =
       createAuthDto.fullName?.split(' ').slice(1).join(' ').trim() || '';
 
+    if (createAuthDto.role === 'user') {
+      createAuthDto.status = 'active';
+    }
+
     const result = await this.userModel.create({
       ...createAuthDto,
       firstName,
@@ -41,6 +45,15 @@ export class AuthService {
 
     const isMath = await bcrypt.compare(payload.password, user.password);
     if (!isMath) throw new HttpException('password incorrect', 400);
+
+    if (user.status === 'pending')
+      throw new HttpException(
+        'You are not approved alrady pending please contact admin',
+        400,
+      );
+
+    if (user.status === 'block')
+      throw new HttpException('Your account has been blocked by admin', 400);
 
     const accessToken = this.jwtService.sign(
       {
