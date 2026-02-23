@@ -1,13 +1,10 @@
-import { IsMongoId, IsNotEmpty, IsString, IsIn } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
 
 export class SendMessageDto {
   @IsMongoId()
   contactId: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   message: string;
-
-  @IsIn(['user', 'owner'])
-  senderRole: 'user' | 'owner';
 }

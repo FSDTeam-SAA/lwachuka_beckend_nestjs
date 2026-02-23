@@ -1,10 +1,7 @@
-import { IsNotEmpty, IsString, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateContactpropretyDto {
-  @IsMongoId()
-  propertyOwnerId: string;
-
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   message: string;
 }

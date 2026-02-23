@@ -21,16 +21,32 @@ export class ContactpropretyController {
     private readonly contactpropretyService: ContactpropretyService,
   ) {}
 
+  // Reply
+  @Post('send-message')
+  @UseGuards(AuthGuard('user', 'vendor', 'agent'))
+  @HttpCode(HttpStatus.OK)
+  async sendMessage(@Req() req: Request, @Body() dto: SendMessageDto) {
+    const senderId = req.user!.id;
+    console.log(senderId);
+    console.log(dto);
+    const result = await this.contactpropretyService.sendMessage(senderId, dto);
+
+    return {
+      message: 'Message sent successfully',
+      data: result,
+    };
+  }
+
   // User first contact
   @Post(':propertyId')
-  @UseGuards(AuthGuard('user', 'agent'))
+  @UseGuards(AuthGuard('user', 'vendor', 'agent'))
   @HttpCode(HttpStatus.CREATED)
   async createContactProperty(
     @Req() req: Request,
     @Body() dto: CreateContactpropretyDto,
     @Param('propertyId') propertyId: string,
   ) {
-    const userId = (req as any).user.id;
+    const userId = req.user!.id;
 
     const result = await this.contactpropretyService.createContactProperty(
       userId,
@@ -40,20 +56,6 @@ export class ContactpropretyController {
 
     return {
       message: 'Contact property created successfully',
-      data: result,
-    };
-  }
-
-  // Reply (owner/user)
-  @Post('send-message')
-  @UseGuards(AuthGuard('user', 'agent'))
-  @HttpCode(HttpStatus.OK)
-  async sendMessage(@Req() req: Request, @Body() dto: SendMessageDto) {
-    const senderId = req.user!.id;
-
-    const result = await this.contactpropretyService.sendMessage(senderId, dto);
-    return {
-      message: 'Message sent successfully',
       data: result,
     };
   }
