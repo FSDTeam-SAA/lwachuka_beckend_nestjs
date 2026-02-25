@@ -67,7 +67,7 @@ export class UserController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard('user', 'agent', 'seller', 'vendor', 'admin'))
+  @UseGuards(AuthGuard('user', 'agent', 'vendor', 'admin'))
   @HttpCode(HttpStatus.OK)
   async findProfile(@Req() req: Request) {
     const result = await this.userService.getProfile(req.user!.id);
@@ -78,7 +78,7 @@ export class UserController {
   }
 
   @Put('profile')
-  @UseGuards(AuthGuard('user', 'agent', 'seller', 'vendor', 'admin'))
+  @UseGuards(AuthGuard('user', 'agent', 'vendor', 'admin'))
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('profileImage', fileUpload.uploadConfig))
   async updateProfile(
