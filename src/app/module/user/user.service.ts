@@ -59,6 +59,7 @@ export class UserService {
       'location',
       'phoneNumber',
       'address',
+      'status',
     ];
 
     if (searchTerm) {
