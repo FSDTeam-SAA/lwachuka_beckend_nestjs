@@ -41,25 +41,35 @@ export class Property {
   plot: number;
 
   @Prop()
-  kitchenType: string;
+  keyBathrooms:string;
 
   @Prop()
-  parking: string;
+  keyBedRooms:string;
 
   @Prop()
-  finishes: string;
+  keyBuiltUp:number;
 
   @Prop()
-  balconyType: string;
+  keyKitchenType:string;
+
 
   @Prop()
-  storage: string;
+  keyParking: string;
 
   @Prop()
-  coolingSystem: string;
+  keyFinishes: string;
 
   @Prop()
-  moveInStatus: string;
+  keyBalconyType: string;
+
+  @Prop()
+  keyStorage: string;
+
+  @Prop()
+  keyCoolingSystem: string;
+
+  @Prop()
+  keyMoveInStatus: string;
 
   @Prop()
   description: string;

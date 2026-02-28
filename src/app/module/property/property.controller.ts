@@ -68,6 +68,7 @@ export class PropertyController {
       'purpose',
       'referenceNumber',
       'status',
+      'price',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllProperty(filters, options);

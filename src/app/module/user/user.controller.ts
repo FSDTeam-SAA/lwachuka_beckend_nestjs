@@ -55,6 +55,7 @@ export class UserController {
       'role',
       'location',
       'address',
+      'status',
     ]);
 
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);

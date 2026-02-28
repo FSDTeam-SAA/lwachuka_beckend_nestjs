@@ -46,11 +46,13 @@ export class AuthService {
     const isMath = await bcrypt.compare(payload.password, user.password);
     if (!isMath) throw new HttpException('password incorrect', 400);
 
+    // if (user.role !== 'user' && user.role !== 'admin') {
     if (user.status === 'pending')
       throw new HttpException(
         'You are not approved alrady pending please contact admin',
         400,
       );
+    // }
 
     if (user.status === 'block')
       throw new HttpException('Your account has been blocked by admin', 400);

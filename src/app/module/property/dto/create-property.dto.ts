@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreatePropertyDto {
   @IsString()
@@ -25,54 +26,73 @@ export class CreatePropertyDto {
   ])
   propertyType: string;
 
+  @Type(() => Number)
   @IsNumber()
   bedrooms: number;
 
+  @Type(() => Number)
   @IsNumber()
   bathrooms: number;
 
+  @Type(() => Number)
   @IsNumber()
   area: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   builtUp?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   plot?: number;
 
+  // ✅ Fixed naming according to model (key*)
   @IsOptional()
   @IsString()
-  kitchenType?: string;
+  keyBathrooms?: string;
 
   @IsOptional()
   @IsString()
-  parking?: string;
+  keyBedRooms?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  keyBuiltUp?: number;
 
   @IsOptional()
   @IsString()
-  finishes?: string;
+  keyKitchenType?: string;
 
   @IsOptional()
   @IsString()
-  balconyType?: string;
+  keyParking?: string;
 
   @IsOptional()
   @IsString()
-  storage?: string;
+  keyFinishes?: string;
 
   @IsOptional()
   @IsString()
-  coolingSystem?: string;
+  keyBalconyType?: string;
 
   @IsOptional()
   @IsString()
-  moveInStatus?: string;
+  keyStorage?: string;
 
   @IsOptional()
   @IsString()
-  description: string;
+  keyCoolingSystem?: string;
+
+  @IsOptional()
+  @IsString()
+  keyMoveInStatus?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsOptional()
   @IsArray()
@@ -81,6 +101,17 @@ export class CreatePropertyDto {
   @IsString()
   location: string;
 
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  lat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  lng?: number;
+
+  @Type(() => Number)
   @IsNumber()
   price: number;
 
@@ -105,12 +136,21 @@ export class CreatePropertyDto {
   addedOn?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   originalPrice?: number;
 
   @IsOptional()
   @IsDateString()
   handoverDate?: Date;
+
+  @IsOptional()
+  @IsEnum(['pending', 'approved', 'rejected'])
+  status?: string;
+
+  @IsOptional()
+  @IsArray()
+  listingUser?: string[];
 
   @IsOptional()
   @IsArray()
