@@ -14,6 +14,7 @@ import { BookmarkModule } from './app/module/bookmark/bookmark.module';
 import { ContactModule } from './app/module/contact/contact.module';
 import { ContactpropretyModule } from './app/module/contactproprety/contactproprety.module';
 import { AdvertisementmanagementModule } from './app/module/advertisementmanagement/advertisementmanagement.module';
+import { AdvertisementModule } from './app/module/advertisement/advertisement.module';
 import config from './app/config';
 
 @Module({
@@ -31,6 +32,7 @@ import config from './app/config';
     ContactModule,
     ContactpropretyModule,
     AdvertisementmanagementModule,
+    AdvertisementModule,
   ],
   controllers: [AppController],
   providers: [AppService],
