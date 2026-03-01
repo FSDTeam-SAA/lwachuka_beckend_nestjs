@@ -10,6 +10,7 @@ import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import Stripe from 'stripe';
 import config from 'src/app/config';
+import { MpesaService } from '../mpesa/mpesa.service';
 
 @Injectable()
 export class SubscriberService {
@@ -21,6 +22,7 @@ export class SubscriberService {
     private readonly userModel: mongoose.Model<User>,
     @InjectModel(Payment.name)
     private readonly paymentModel: mongoose.Model<Payment>,
+    private readonly mpesaService: MpesaService,
   ) {}
 
   async create(createSubscriberDto: CreateSubscriberDto) {
@@ -143,5 +145,52 @@ export class SubscriberService {
     });
 
     return session.url;
+  }
+
+  async padListingMpesa(
+    userId: string,
+    subscriberId: string,
+    phoneNumber: string,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new HttpException('User not found', 404);
+
+    const sub = await this.subscriberModel.findById(subscriberId);
+    if (!sub) throw new HttpException('Subscriber not found', 404);
+
+    // Step 1: Create pending payment
+    const payment = await this.paymentModel.create({
+      user: user._id,
+      subscriber: sub._id,
+      amount: sub.price,
+      currency: 'KES',
+      status: 'pending',
+      paymentType: 'subscription',
+      mpesaPhoneNumber: phoneNumber,
+    });
+
+    // Step 2: Send STK Push
+    const stkRes = await this.mpesaService.stkPush({
+      phone: phoneNumber,
+      amount: sub.price,
+      accountReference: `SUB-${sub._id}`,
+      transactionDesc: `Subscription: ${sub.name}`,
+    });
+
+    // Step 3: Save CheckoutRequestID to match with callback
+    await this.paymentModel.findByIdAndUpdate(payment._id, {
+      mpesaMerchantRequestId: stkRes.MerchantRequestID,
+      mpesaCheckoutRequestId: stkRes.CheckoutRequestID,
+    });
+
+    return {
+      paymentId: payment._id,
+      merchantRequestId: stkRes.MerchantRequestID,
+      checkoutRequestId: stkRes.CheckoutRequestID,
+      // ✅ After this, user enters PIN on phone → Safaricom calls callback automatically
+      message:
+        stkRes.CustomerMessage ||
+        'STK Push sent. Please enter PIN on your phone.',
+    };
   }
 }

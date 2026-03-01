@@ -6,8 +6,10 @@ import { Response } from 'express';
 import config from '../../config';
 import { Payment, PaymentDocument } from '../payment/entities/payment.entity';
 import { User, UserDocument } from '../user/entities/user.entity';
-import { Subscriber } from 'rxjs';
-import { SubscriberDocument } from '../subscriber/entities/subscriber.entity';
+import {
+  Subscriber,
+  SubscriberDocument,
+} from '../subscriber/entities/subscriber.entity';
 
 @Injectable()
 export class WebhookService {

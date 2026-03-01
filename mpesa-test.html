@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lwachuka — M-Pesa Payment</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --green: #00a651;
+        --green-dark: #007a3d;
+        --green-light: #e6f7ee;
+        --black: #0a0a0a;
+        --white: #ffffff;
+        --gray: #f5f5f5;
+        --gray2: #e0e0e0;
+        --text: #1a1a1a;
+        --muted: #888;
+        --red: #e53935;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--black);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Background pattern */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 20% 20%,
+            rgba(0, 166, 81, 0.12) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 80% at 80% 80%,
+            rgba(0, 166, 81, 0.08) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+      }
+
+      body::after {
+        content: 'M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA M-PESA';
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        font-family: 'Syne', sans-serif;
+        font-size: 120px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.02);
+        word-break: break-all;
+        line-height: 1;
+        pointer-events: none;
+        letter-spacing: -4px;
+      }
+
+      .card {
+        background: var(--white);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 460px;
+        overflow: hidden;
+        box-shadow:
+          0 40px 80px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(255, 255, 255, 0.05);
+        position: relative;
+        z-index: 1;
+        animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Header */
+      .header {
+        background: var(--green);
+        padding: 28px 32px;
+        position: relative;
+        overflow: hidden;
+      }
+      .header::before {
+        content: '';
+        position: absolute;
+        right: -30px;
+        top: -30px;
+        width: 160px;
+        height: 160px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+      }
+      .header::after {
+        content: '';
+        position: absolute;
+        right: 20px;
+        bottom: -50px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+      .mpesa-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .mpesa-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--white);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 11px;
+        color: var(--green);
+        letter-spacing: -0.5px;
+      }
+      .mpesa-label {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--white);
+        letter-spacing: 0.5px;
+      }
+      .header-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--white);
+        line-height: 1.1;
+        position: relative;
+        z-index: 1;
+      }
+      .header-sub {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.75);
+        margin-top: 4px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Body */
+      .body {
+        padding: 28px 32px;
+      }
+
+      /* Plan card */
+      .plan-card {
+        background: var(--gray);
+        border-radius: 14px;
+        padding: 16px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        border: 1.5px solid var(--gray2);
+      }
+      .plan-name {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text);
+      }
+      .plan-duration {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .plan-price {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 22px;
+        color: var(--green);
+      }
+      .plan-currency {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      /* Form */
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+      }
+      .input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .input-flag {
+        position: absolute;
+        left: 14px;
+        font-size: 20px;
+        pointer-events: none;
+      }
+      .input-code {
+        position: absolute;
+        left: 46px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        pointer-events: none;
+      }
+      input[type='text'],
+      input[type='password'],
+      select {
+        width: 100%;
+        height: 50px;
+        border: 1.5px solid var(--gray2);
+        border-radius: 12px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 15px;
+        color: var(--text);
+        background: var(--white);
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        padding: 0 16px;
+      }
+      input[type='text'].phone-input {
+        padding-left: 90px;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.1);
+      }
+      input.error {
+        border-color: var(--red);
+      }
+
+      /* API config section */
+      .config-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+        margin-bottom: 16px;
+        user-select: none;
+      }
+      .config-toggle:hover {
+        color: var(--green);
+      }
+      .config-toggle svg {
+        transition: transform 0.2s;
+      }
+      .config-toggle.open svg {
+        transform: rotate(90deg);
+      }
+
+      .config-section {
+        background: #fafafa;
+        border: 1.5px solid var(--gray2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+        display: none;
+      }
+      .config-section.visible {
+        display: block;
+      }
+      .config-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .config-row:last-child {
+        margin-bottom: 0;
+      }
+      .config-label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 5px;
+      }
+      .config-input {
+        width: 100%;
+        height: 38px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+        padding: 0 10px !important;
+      }
+      .config-full {
+        grid-column: 1 / -1;
+      }
+
+      /* Button */
+      .btn {
+        width: 100%;
+        height: 52px;
+        background: var(--green);
+        color: var(--white);
+        border: none;
+        border-radius: 14px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        letter-spacing: 0.3px;
+        transition:
+          background 0.2s,
+          transform 0.1s,
+          box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .btn:hover {
+        background: var(--green-dark);
+        box-shadow: 0 8px 24px rgba(0, 166, 81, 0.3);
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn:disabled {
+        background: var(--gray2);
+        cursor: not-allowed;
+        color: var(--muted);
+        box-shadow: none;
+      }
+
+      .btn-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2.5px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--white);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Status box */
+      .status-box {
+        margin-top: 20px;
+        border-radius: 14px;
+        padding: 16px;
+        font-size: 13px;
+        line-height: 1.6;
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .status-box.success {
+        background: var(--green-light);
+        border: 1.5px solid rgba(0, 166, 81, 0.3);
+        color: var(--green-dark);
+      }
+      .status-box.error {
+        background: #fdecea;
+        border: 1.5px solid rgba(229, 57, 53, 0.3);
+        color: var(--red);
+      }
+      .status-box.info {
+        background: #e8f4fd;
+        border: 1.5px solid rgba(33, 150, 243, 0.3);
+        color: #1565c0;
+      }
+
+      .status-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .data-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        font-size: 12px;
+      }
+      .data-row:last-child {
+        border-bottom: none;
+      }
+      .data-key {
+        color: var(--muted);
+      }
+      .data-val {
+        font-weight: 500;
+        font-family: monospace;
+        font-size: 11px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Callback section */
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 24px 0;
+      }
+      .divider-line {
+        flex: 1;
+        height: 1px;
+        background: var(--gray2);
+      }
+      .divider-text {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+
+      .btn-outline {
+        width: 100%;
+        height: 48px;
+        background: transparent;
+        color: var(--green);
+        border: 1.5px solid var(--green);
+        border-radius: 14px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-outline:hover {
+        background: var(--green-light);
+      }
+      .btn-outline:disabled {
+        border-color: var(--gray2);
+        color: var(--muted);
+        cursor: not-allowed;
+      }
+
+      /* Steps */
+      .steps {
+        display: flex;
+        gap: 0;
+        margin-bottom: 24px;
+      }
+      .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+      .step::after {
+        content: '';
+        position: absolute;
+        top: 14px;
+        right: 0;
+        width: 50%;
+        height: 2px;
+        background: var(--gray2);
+        z-index: 0;
+      }
+      .step::before {
+        content: '';
+        position: absolute;
+        top: 14px;
+        left: 0;
+        width: 50%;
+        height: 2px;
+        background: var(--gray2);
+        z-index: 0;
+      }
+      .step:first-child::before,
+      .step:last-child::after {
+        display: none;
+      }
+
+      .step-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--gray2);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+        font-family: 'Syne', sans-serif;
+        transition: all 0.3s;
+      }
+      .step.active .step-dot {
+        background: var(--green);
+        color: var(--white);
+      }
+      .step.done .step-dot {
+        background: var(--green-dark);
+        color: var(--white);
+      }
+      .step-label {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .step.active .step-label {
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      .footer-note {
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 20px;
+        line-height: 1.6;
+      }
+      .footer-note a {
+        color: var(--green);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <!-- Header -->
+      <div class="header">
+        <div class="mpesa-logo">
+          <div class="mpesa-icon">M-PESA</div>
+          <span class="mpesa-label">Lipa Na M-Pesa</span>
+        </div>
+        <div class="header-title">Subscribe & Pay</div>
+        <div class="header-sub">Secure payment powered by Safaricom M-Pesa</div>
+      </div>
+
+      <div class="body">
+        <!-- Steps -->
+        <div class="steps">
+          <div class="step active" id="step1">
+            <div class="step-dot">1</div>
+            <div class="step-label">Enter</div>
+          </div>
+          <div class="step" id="step2">
+            <div class="step-dot">2</div>
+            <div class="step-label">Push</div>
+          </div>
+          <div class="step" id="step3">
+            <div class="step-dot">3</div>
+            <div class="step-label">Confirm</div>
+          </div>
+        </div>
+
+        <!-- Plan Info -->
+        <div class="plan-card">
+          <div>
+            <div class="plan-name" id="planName">Premium Plan</div>
+            <div class="plan-duration" id="planDuration">30 days access</div>
+          </div>
+          <div style="text-align: right">
+            <div class="plan-price" id="planPrice">KES 2,500</div>
+            <div class="plan-currency">Kenyan Shilling</div>
+          </div>
+        </div>
+
+        <!-- API Config Toggle -->
+        <div class="config-toggle" id="configToggle" onclick="toggleConfig()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M4 2l4 4-4 4"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          API Configuration (Base URL, Token, Subscriber ID)
+        </div>
+
+        <div class="config-section" id="configSection">
+          <div class="config-row">
+            <div>
+              <div class="config-label">Base URL</div>
+              <input
+                class="config-input"
+                type="text"
+                id="baseUrl"
+                placeholder="http://localhost:5000/api/v1"
+                value="http://localhost:5000/api/v1"
+              />
+            </div>
+            <div>
+              <div class="config-label">Subscriber ID</div>
+              <input
+                class="config-input"
+                type="text"
+                id="subscriberId"
+                placeholder="6997f278228f1caf..."
+              />
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="config-full">
+              <div class="config-label">JWT Token</div>
+              <input
+                class="config-input"
+                type="password"
+                id="jwtToken"
+                placeholder="Bearer token from login"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Input -->
+        <div class="form-group">
+          <label class="form-label">M-Pesa Phone Number</label>
+          <div class="input-wrap">
+            <span class="input-flag">🇰🇪</span>
+            <span class="input-code">+254</span>
+            <input
+              class="phone-input"
+              type="text"
+              id="phoneInput"
+              placeholder="7XXXXXXXX"
+              maxlength="9"
+              oninput="this.value = this.value.replace(/\D/g, '')"
+            />
+          </div>
+        </div>
+
+        <!-- STK Push Button -->
+        <button class="btn" id="stkBtn" onclick="sendStkPush()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2a10 10 0 100 20A10 10 0 0012 2z"
+              stroke="white"
+              stroke-width="1.5"
+            />
+            <path
+              d="M8 12h8M14 9l3 3-3 3"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span id="stkBtnText">Send STK Push</span>
+          <div class="btn-spinner" id="stkSpinner"></div>
+        </button>
+
+        <!-- STK Result -->
+        <div class="status-box" id="stkResult"></div>
+
+        <!-- Divider -->
+        <div class="divider" id="callbackDivider" style="display: none">
+          <div class="divider-line"></div>
+          <div class="divider-text">Step 2 — Simulate Callback</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Simulate Callback Button -->
+        <button
+          class="btn-outline"
+          id="callbackBtn"
+          style="display: none"
+          onclick="simulateCallback()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M4 12v-1a8 8 0 018-8 8 8 0 017.9 7M20 12v1a8 8 0 01-8 8 8 8 0 01-7.9-7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M20 4v4h-4"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span id="cbBtnText">Simulate Success Callback</span>
+          <div
+            class="btn-spinner"
+            id="cbSpinner"
+            style="
+              border-color: rgba(0, 166, 81, 0.3);
+              border-top-color: var(--green);
+            "
+          ></div>
+        </button>
+
+        <!-- Callback Result -->
+        <div class="status-box" id="cbResult"></div>
+
+        <div class="footer-note">
+          Sandbox test using Safaricom Daraja API<br />
+          <a href="https://developer.safaricom.co.ke" target="_blank"
+            >developer.safaricom.co.ke</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let checkoutRequestId = null;
+      let merchantRequestId = null;
+      let paymentId = null;
+
+      // ── Load saved config ──────────────────────────────────────
+      window.onload = () => {
+        const saved = JSON.parse(localStorage.getItem('mpesa_config') || '{}');
+        if (saved.baseUrl)
+          document.getElementById('baseUrl').value = saved.baseUrl;
+        if (saved.subscriberId)
+          document.getElementById('subscriberId').value = saved.subscriberId;
+        if (saved.jwtToken)
+          document.getElementById('jwtToken').value = saved.jwtToken;
+      };
+
+      function saveConfig() {
+        localStorage.setItem(
+          'mpesa_config',
+          JSON.stringify({
+            baseUrl: document.getElementById('baseUrl').value,
+            subscriberId: document.getElementById('subscriberId').value,
+            jwtToken: document.getElementById('jwtToken').value,
+          }),
+        );
+      }
+
+      function toggleConfig() {
+        const toggle = document.getElementById('configToggle');
+        const section = document.getElementById('configSection');
+        toggle.classList.toggle('open');
+        section.classList.toggle('visible');
+      }
+
+      function setStep(n) {
+        [1, 2, 3].forEach((i) => {
+          const el = document.getElementById('step' + i);
+          el.classList.remove('active', 'done');
+          if (i < n) el.classList.add('done');
+          if (i === n) el.classList.add('active');
+        });
+      }
+
+      function showStatus(id, type, title, rows) {
+        const box = document.getElementById(id);
+        box.className = `status-box ${type}`;
+        box.style.display = 'block';
+
+        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        let html = `<div class="status-title">${icons[type]} ${title}</div>`;
+        rows.forEach(([k, v]) => {
+          html += `<div class="data-row"><span class="data-key">${k}</span><span class="data-val" title="${v}">${v}</span></div>`;
+        });
+        box.innerHTML = html;
+      }
+
+      function setLoading(btnId, spinnerId, textId, loading, label) {
+        const btn = document.getElementById(btnId);
+        const spinner = document.getElementById(spinnerId);
+        const text = document.getElementById(textId);
+        btn.disabled = loading;
+        spinner.style.display = loading ? 'block' : 'none';
+        if (label) text.textContent = label;
+      }
+
+      // ── STK Push ───────────────────────────────────────────────
+      async function sendStkPush() {
+        saveConfig();
+
+        const phone = document.getElementById('phoneInput').value.trim();
+        const baseUrl = document.getElementById('baseUrl').value.trim();
+        const subscriberId = document
+          .getElementById('subscriberId')
+          .value.trim();
+        const token = document.getElementById('jwtToken').value.trim();
+
+        if (!phone || phone.length < 9) {
+          document.getElementById('phoneInput').classList.add('error');
+          showStatus('stkResult', 'error', 'Invalid Phone', [
+            ['Error', 'Enter 9-digit number e.g. 708374149'],
+          ]);
+          return;
+        }
+        document.getElementById('phoneInput').classList.remove('error');
+
+        if (!subscriberId) {
+          showStatus('stkResult', 'error', 'Missing Config', [
+            ['Error', 'Enter Subscriber ID in config above'],
+          ]);
+          return;
+        }
+        if (!token) {
+          showStatus('stkResult', 'error', 'Missing Token', [
+            ['Error', 'Enter JWT token in config above'],
+          ]);
+          return;
+        }
+
+        setLoading(
+          'stkBtn',
+          'stkSpinner',
+          'stkBtnText',
+          true,
+          'Sending STK Push...',
+        );
+        document.getElementById('stkResult').style.display = 'none';
+        document.getElementById('callbackDivider').style.display = 'none';
+        document.getElementById('callbackBtn').style.display = 'none';
+        document.getElementById('cbResult').style.display = 'none';
+
+        setStep(2);
+
+        try {
+          const res = await fetch(
+            `${baseUrl}/subscriber/pad-listing-mpesa/${subscriberId}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ phoneNumber: `254${phone}` }),
+            },
+          );
+
+          const data = await res.json();
+
+          if (!res.ok || !data.success) {
+            throw new Error(data.message || 'STK Push failed');
+          }
+
+          checkoutRequestId = data.data.checkoutRequestId;
+          merchantRequestId = data.data.merchantRequestId;
+          paymentId = data.data.paymentId;
+
+          showStatus(
+            'stkResult',
+            'success',
+            'STK Push Sent! Check your phone',
+            [
+              ['Payment ID', paymentId],
+              ['Checkout ID', checkoutRequestId],
+              ['Merchant ID', merchantRequestId],
+              ['Message', data.data.message],
+            ],
+          );
+
+          // Show callback button
+          document.getElementById('callbackDivider').style.display = 'flex';
+          document.getElementById('callbackBtn').style.display = 'flex';
+        } catch (err) {
+          setStep(1);
+          showStatus('stkResult', 'error', 'STK Push Failed', [
+            ['Error', err.message],
+          ]);
+        } finally {
+          setLoading(
+            'stkBtn',
+            'stkSpinner',
+            'stkBtnText',
+            false,
+            'Send STK Push',
+          );
+        }
+      }
+
+      // ── Simulate Callback ─────────────────────────────────────
+      async function simulateCallback() {
+        if (!checkoutRequestId) {
+          showStatus('cbResult', 'error', 'No Checkout ID', [
+            ['Error', 'Send STK Push first'],
+          ]);
+          return;
+        }
+
+        const baseUrl = document.getElementById('baseUrl').value.trim();
+
+        setLoading(
+          'callbackBtn',
+          'cbSpinner',
+          'cbBtnText',
+          true,
+          'Simulating...',
+        );
+        document.getElementById('cbResult').style.display = 'none';
+
+        const callbackBody = {
+          Body: {
+            stkCallback: {
+              MerchantRequestID: merchantRequestId,
+              CheckoutRequestID: checkoutRequestId,
+              ResultCode: 0,
+              ResultDesc: 'The service request is processed successfully.',
+              CallbackMetadata: {
+                Item: [
+                  { Name: 'Amount', Value: 2500 },
+                  { Name: 'MpesaReceiptNumber', Value: 'NLJ7RT61SV' },
+                  { Name: 'TransactionDate', Value: 20260301120000 },
+                  { Name: 'PhoneNumber', Value: 254708374149 },
+                ],
+              },
+            },
+          },
+        };
+
+        try {
+          const res = await fetch(`${baseUrl}/mpesa/callback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(callbackBody),
+          });
+
+          const data = await res.json();
+
+          if (data?.data?.ResultCode === 0 || res.ok) {
+            setStep(3);
+            showStatus('cbResult', 'success', 'Payment Completed! 🎉', [
+              ['Status', 'completed'],
+              ['Result Code', '0'],
+              ['Receipt', 'NLJ7RT61SV'],
+              ['Note', 'Check MongoDB — isSubscribed: true'],
+            ]);
+            document.getElementById('callbackBtn').style.display = 'none';
+          } else {
+            throw new Error(data.message || 'Callback failed');
+          }
+        } catch (err) {
+          showStatus('cbResult', 'error', 'Callback Failed', [
+            ['Error', err.message],
+            ['Tip', 'Make sure server is running on correct port'],
+          ]);
+        } finally {
+          setLoading(
+            'callbackBtn',
+            'cbSpinner',
+            'cbBtnText',
+            false,
+            'Simulate Success Callback',
+          );
+        }
+      }
+
+      // Enter key support
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          if (!checkoutRequestId) sendStkPush();
+          else simulateCallback();
+        }
+      });
+    </script>
+  </body>
+</html>

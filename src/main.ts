@@ -13,14 +13,12 @@ const port = config.port;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'debug'],
+    logger: ['log', 'error', 'warn', 'debug'],
   });
   app.use('/api/v1/webhook', express.raw({ type: 'application/json' }));
 
   app.enableCors({ origin: '*', credentials: true });
-  app.setGlobalPrefix('api/v1', {
-    exclude: [''],
-  });
+  app.setGlobalPrefix('api/v1');
   app.use(cookieParser());
 
   app.useGlobalPipes(

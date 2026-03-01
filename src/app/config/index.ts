@@ -41,4 +41,12 @@ export default {
     max: process.env.RATE_LIMIT_MAX,
     delay: process.env.RATE_LIMIT_DELAY,
   },
+  mpass: {
+    mpass_base_url: process.env.MPESA_BASE_URL,
+    mpass_consumer_key: process.env.CONSUMER_KEY,
+    mpass_consumer_secret: process.env.CONSUMER_SECRET,
+    mpass_shortcode: process.env.SHORTCODE,
+    mpass_passkey: process.env.PASSKEY,
+    mpass_callback_url: process.env.CALLBACK_URL,
+  },
 };

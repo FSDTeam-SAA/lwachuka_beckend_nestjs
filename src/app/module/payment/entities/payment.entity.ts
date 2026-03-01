@@ -15,22 +15,48 @@ export class Payment {
   amount: number;
 
   @Prop()
-  stripeSessionId: string;
-
-  @Prop()
-  stripePaymentIntentId: string;
-
-  @Prop()
   paymentType: string;
 
-  @Prop({ default: 'usd' })
+  @Prop({ default: 'KES' })
   currency: string;
 
   @Prop({
-    enum: ['pending', 'completed', 'failed', 'refunded'],
+    enum: ['pending', 'pending_retry', 'completed', 'failed', 'refunded'],
     default: 'pending',
   })
   status: string;
+
+  // ─── Stripe fields ─────────────────────────────────────────
+  @Prop()
+  stripeSessionId?: string;
+
+  @Prop()
+  stripePaymentIntentId?: string;
+
+  // ─── M-Pesa fields ─────────────────────────────────────────
+  @Prop()
+  mpesaPhoneNumber?: string;
+
+  @Prop()
+  mpesaMerchantRequestId?: string;
+
+  @Prop()
+  mpesaCheckoutRequestId?: string;
+
+  @Prop()
+  mpesaReceiptNumber?: string;
+
+  @Prop()
+  mpesaTransactionDate?: string;
+
+  @Prop()
+  mpesaResultCode?: number;
+
+  @Prop()
+  mpesaResultDesc?: string;
+
+  @Prop({ type: Object })
+  mpesaCallbackRaw?: any;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

@@ -37,6 +37,6 @@ export class CreatePaymentDto {
   currency?: string;
 
   @IsOptional()
-  @IsEnum(['pending', 'completed', 'failed', 'refunded'])
-  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  @IsEnum(['pending', 'pending_retry', 'completed', 'failed', 'refunded'])
+  status?: 'pending' | 'pending_retry' | 'completed' | 'failed' | 'refunded';
 }
