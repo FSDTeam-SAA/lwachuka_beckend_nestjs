@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import config from 'src/app/config';
 
 export type UserDocument = User & Document;
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
@@ -21,10 +22,7 @@ export class User {
   @Prop()
   profileImage: string;
 
-  @Prop({
-    enum: ['user', 'agent', 'vendor', 'admin'],
-    default: 'user',
-  })
+  @Prop({ enum: ['user', 'agent', 'vendor', 'admin'], default: 'user' })
   role: string;
 
   @Prop({ enum: ['male', 'female'] })
@@ -60,13 +58,16 @@ export class User {
   @Prop()
   otpExpiry?: Date;
 
-  @Prop()
+  // ✅ default false
+  @Prop({ default: false })
   verifiedForget: boolean;
 
+  // ✅ optional
   @Prop()
   stripeAccountId: string;
 
-  @Prop()
+  // ✅ default false
+  @Prop({ default: false })
   isSubscribed: boolean;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' })

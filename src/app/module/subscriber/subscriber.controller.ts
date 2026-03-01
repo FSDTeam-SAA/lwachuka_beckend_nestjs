@@ -100,4 +100,23 @@ export class SubscriberController {
       data: result,
     };
   }
+
+  @Post('pad-listing-mpesa/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('user', 'vendor', 'agent'))
+  async padListingMpesa(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: { phoneNumber: string },
+  ) {
+    const result = await this.subscriberService.padListingMpesa(
+      req.user!.id,
+      id,
+      body.phoneNumber,
+    );
+    return {
+      message: 'M-Pesa STK Push initiated',
+      data: result,
+    };
+  }
 }
