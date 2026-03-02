@@ -18,7 +18,9 @@ async function bootstrap() {
   app.use('/api/v1/webhook', express.raw({ type: 'application/json' }));
 
   app.enableCors({ origin: '*', credentials: true });
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
   app.use(cookieParser());
 
   app.useGlobalPipes(
