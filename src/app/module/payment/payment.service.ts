@@ -118,4 +118,39 @@ export class PaymentService {
       data: result,
     };
   }
+
+  async paymentManagemant() {
+    const result = await this.paymentModel.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const pendingAmount = result.find((item) => item._id === 'pending') || {
+      _id: 'pending',
+      count: 0,
+      totalAmount: 0,
+    };
+    const completedAmount = result.find((item) => item._id === 'completed') || {
+      _id: 'pending',
+      count: 0,
+      totalAmount: 0,
+    };
+
+    const totalTensations = await this.paymentModel.estimatedDocumentCount();
+    const totalFaildTencations = await this.paymentModel.countDocuments({
+      status: 'failed',
+    });
+
+    return {
+      totalTensations,
+      totalFaildTencations,
+      pendingAmount: pendingAmount.totalAmount,
+      completedAmount: completedAmount.totalAmount,
+    };
+  }
 }

@@ -23,4 +23,16 @@ export class DashboardController {
       data: result,
     };
   }
+
+  @Get('analytics-reports')
+  @UseGuards(AuthGuard('admin'))
+  @HttpCode(HttpStatus.OK)
+  async analyticsReports() {
+    const result = await this.dashboardService.analyticsReports();
+
+    return {
+      message: 'Dashboard data fetched successfully',
+      data: result,
+    };
+  }
 }

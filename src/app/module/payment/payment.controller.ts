@@ -60,6 +60,17 @@ export class PaymentController {
     };
   }
 
+  @Get('payment-overview')
+  @UseGuards(AuthGuard('admin'))
+  @HttpCode(HttpStatus.OK)
+  async paymentManagemant() {
+    const result = await this.paymentService.paymentManagemant();
+    return {
+      message: 'Payment management data retrieved successfully',
+      data: result,
+    };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getSinglePayment(@Param('id') id: string) {

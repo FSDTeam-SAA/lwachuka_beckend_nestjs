@@ -53,4 +53,98 @@ export class DashboardService {
       .countDocuments();
     return { user, property, thismounthRevenue, activeAgent };
   }
+
+  async analyticsReports() {
+    const totalUsers = await this.userModel.countDocuments();
+
+    const totalProperties = await this.propertyModel.countDocuments({
+      status: 'approved',
+    });
+
+    const revenueData = await this.paymentModel.aggregate([
+      { $match: { status: 'completed' } },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$amount' },
+        },
+      },
+    ]);
+
+    const totalRevenue = revenueData[0]?.totalRevenue || 0;
+
+    const lastMonthUsers = await this.userModel.countDocuments({
+      createdAt: {
+        $gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+      },
+    });
+
+    const previousMonthUsers = await this.userModel.countDocuments({
+      createdAt: {
+        $gte: new Date(new Date().setMonth(new Date().getMonth() - 2)),
+        $lt: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+      },
+    });
+
+    const growthRate =
+      previousMonthUsers === 0
+        ? 0
+        : ((lastMonthUsers - previousMonthUsers) / previousMonthUsers) * 100;
+
+    const userTrend = await this.userModel.aggregate([
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          users: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const revenueTrend = await this.paymentModel.aggregate([
+      { $match: { status: 'completed' } },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          revenue: { $sum: '$amount' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const propertyGrowth = await this.propertyModel.aggregate([
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          properties: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const propertyByType = await this.propertyModel.aggregate([
+      {
+        $group: {
+          _id: '$propertyType',
+          total: { $sum: 1 },
+        },
+      },
+    ]);
+
+    return {
+      cards: {
+        userGrowthRate: Number(growthRate.toFixed(2)),
+        totalUsers,
+        totalProperties,
+        totalRevenue,
+      },
+
+      charts: {
+        userTrend,
+        revenueTrend,
+        propertyGrowth,
+        propertyByType,
+      },
+    };
+  }
 }
