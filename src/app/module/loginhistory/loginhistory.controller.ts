@@ -21,6 +21,7 @@ export class LoginhistoryController {
   @UseGuards(AuthGuard('admin'))
   @HttpCode(HttpStatus.OK)
   async getAllAduditLog(@Req() req: Request) {
+    const filters = pick(req.query, ['searchTerm', 'status']);
     const options = pick(req.query, [
       'limit',
       'page',
@@ -29,12 +30,26 @@ export class LoginhistoryController {
       'sortOrder',
     ]);
 
-    const result = await this.loginhistoryService.getAllAduditLog(options);
+    const result = await this.loginhistoryService.getAllAduditLog(
+      filters,
+      options,
+    );
 
     return {
       message: 'Login history fetched successfully',
       meta: result.meta,
       data: result.data,
+    };
+  }
+
+  @Get('overview')
+  @UseGuards(AuthGuard('admin'))
+  @HttpCode(HttpStatus.OK)
+  async overViewAuditlog() {
+    const result = await this.loginhistoryService.overViewAuditlog();
+    return {
+      message: 'Login history Overview fetched successfully',
+      data: result,
     };
   }
 

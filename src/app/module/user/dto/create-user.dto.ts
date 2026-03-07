@@ -80,7 +80,7 @@ export class CreateUserDto {
   @IsOptional()
   subscriptionEndDate?: Date;
 
-  @IsEnum(['active', 'inactive', 'pending'])
+  @IsEnum(['active', 'block', 'pending'])
   @IsOptional()
   status?: string;
 }
