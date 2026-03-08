@@ -148,6 +148,10 @@ export class DashboardService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new HttpException('User is not found', 404);
 
+    const savedProperties = await this.bookmarModel.countDocuments({
+      user: userId,
+    });
+
     
   }
 }

@@ -7,11 +7,17 @@ import { fileUpload } from 'src/app/helper/fileUploder';
 import { getLatLngFromAddress } from 'src/app/helper/geocode';
 import { IFilterParams } from 'src/app/helper/pick';
 import paginationHelper, { IOptions } from 'src/app/helper/pagenation';
+import {
+  Property,
+  PropertyDocument,
+} from '../property/entities/property.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: mongoose.Model<User>,
+    @InjectModel(Property.name)
+    private readonly propertyModel: mongoose.Model<PropertyDocument>,
   ) {}
 
   async createUser(
@@ -46,11 +52,67 @@ export class UserService {
     return result;
   }
 
+  // async getAllUsers(params: IFilterParams, options: IOptions) {
+  //   const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+  //   const { searchTerm, ...filterData } = params;
+
+  //   const andCondition: any[] = [];
+  //   const searchAbleFields = [
+  //     'firstName',
+  //     'lastName',
+  //     'email',
+  //     'role',
+  //     'location',
+  //     'phoneNumber',
+  //     'address',
+  //     'status',
+  //   ];
+
+  //   if (searchTerm) {
+  //     andCondition.push({
+  //       $or: searchAbleFields.map((field) => ({
+  //         [field]: {
+  //           $regex: searchTerm,
+  //           $options: 'i',
+  //         },
+  //       })),
+  //     });
+  //   }
+
+  //   if (Object.keys(filterData).length > 0) {
+  //     andCondition.push({
+  //       $and: Object.entries(filterData).map(([key, value]) => ({
+  //         [key]: value,
+  //       })),
+  //     });
+  //   }
+
+  //   const whereConditions =
+  //     andCondition.length > 0 ? { $and: andCondition } : {};
+
+  //   const result = await this.userModel
+  //     .find(whereConditions)
+  //     .sort({ [sortBy]: sortOrder } as any)
+  //     .skip(skip)
+  //     .limit(limit);
+  //   const total = await this.userModel.countDocuments(whereConditions);
+
+  //   return {
+  //     data: result,
+  //     meta: {
+  //       page,
+  //       limit,
+  //       total,
+  //     },
+  //   };
+  // }
+
   async getAllUsers(params: IFilterParams, options: IOptions) {
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
     const { searchTerm, ...filterData } = params;
 
     const andCondition: any[] = [];
+
     const searchAbleFields = [
       'firstName',
       'lastName',
@@ -81,15 +143,74 @@ export class UserService {
       });
     }
 
-    const whereConditions =
-      andCondition.length > 0 ? { $and: andCondition } : {};
+    const matchStage = andCondition.length > 0 ? { $and: andCondition } : {};
 
-    const result = await this.userModel
-      .find(whereConditions)
-      .sort({ [sortBy]: sortOrder } as any)
-      .skip(skip)
-      .limit(limit);
-    const total = await this.userModel.countDocuments(whereConditions);
+    const result = await this.userModel.aggregate([
+      {
+        $match: matchStage,
+      },
+
+      // Property count for agent
+      {
+        $lookup: {
+          from: 'properties',
+          localField: '_id',
+          foreignField: 'createBy',
+          as: 'properties',
+        },
+      },
+
+      // Advertisement count for vendor
+      {
+        $lookup: {
+          from: 'advertisements',
+          localField: '_id',
+          foreignField: 'createdBy',
+          as: 'advertisements',
+        },
+      },
+
+      {
+        $addFields: {
+          approvedPropertyCount: {
+            $size: {
+              $filter: {
+                input: '$properties',
+                as: 'property',
+                cond: { $eq: ['$$property.status', 'approved'] },
+              },
+            },
+          },
+
+          advertisementCount: {
+            $size: '$advertisements',
+          },
+        },
+      },
+
+      {
+        $project: {
+          properties: 0,
+          advertisements: 0,
+        },
+      },
+
+      {
+        $sort: {
+          [sortBy]: sortOrder === 'asc' ? 1 : -1,
+        },
+      },
+
+      {
+        $skip: skip,
+      },
+
+      {
+        $limit: limit,
+      },
+    ]);
+
+    const total = await this.userModel.countDocuments(matchStage);
 
     return {
       data: result,
