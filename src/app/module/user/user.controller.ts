@@ -43,7 +43,7 @@ export class UserController {
   }
 
   @Get('all-users')
-  @UseGuards(AuthGuard('admin'))
+  // @UseGuards(AuthGuard('admin'))
   @HttpCode(HttpStatus.OK)
   async findAllUsers(@Req() req: Request) {
     const filters = pick(req.query, [
