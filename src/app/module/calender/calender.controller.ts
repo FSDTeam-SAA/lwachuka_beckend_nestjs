@@ -99,6 +99,37 @@ export class CalenderController {
     };
   }
 
+  @Get('visit-stats')
+  @UseGuards(AuthGuard('agent'))
+  async getVisitStats(@Req() req: Request) {
+    const agentId = req.user!.id;
+
+    const result = await this.calenderService.getVisitStats(agentId);
+
+    return {
+      message: 'Visit stats retrieved',
+      data: result,
+    };
+  }
+
+  @Put('status/:id')
+  @UseGuards(AuthGuard('agent'))
+  @HttpCode(HttpStatus.OK)
+  async updateVisitStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+  ) {
+    const result = await this.calenderService.updateVisitStatus(
+      id,
+      body.status,
+    );
+
+    return {
+      message: 'Visit status updated successfully',
+      data: result,
+    };
+  }
+
   @Put(':id')
   @UseGuards(AuthGuard('user'))
   @HttpCode(HttpStatus.OK)
