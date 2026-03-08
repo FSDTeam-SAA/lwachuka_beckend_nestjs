@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Bookmark,
@@ -10,10 +10,6 @@ import {
   Property,
   PropertyDocument,
 } from '../property/entities/property.entity';
-import {
-  Subscriber,
-  SubscriberDocument,
-} from '../subscriber/entities/subscriber.entity';
 import { Payment, PaymentDocument } from '../payment/entities/payment.entity';
 
 @Injectable()
@@ -146,5 +142,12 @@ export class DashboardService {
         propertyByType,
       },
     };
+  }
+
+  async userDashboardOverview(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new HttpException('User is not found', 404);
+
+    
   }
 }

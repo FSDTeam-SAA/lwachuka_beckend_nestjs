@@ -94,6 +94,34 @@ export class AdvertisementController {
     };
   }
 
+  @Get('vendor/:vendorId')
+  @HttpCode(HttpStatus.OK)
+  async getVendorAdvertisement(
+    @Param('vendorId') vendorId: string,
+    @Req() req: Request,
+  ) {
+    const filters = pick(req.query, [
+      'searchTerm',
+      'companyName',
+      'advertisementType',
+      'targetRegions',
+      'targetAudience',
+      'compaingDuration',
+    ]);
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await this.advertisementService.getVendorAdvertisement(
+      vendorId,
+      filters,
+      options,
+    );
+
+    return {
+      message: 'Vendor advertisements retrieved successfully',
+      meta: result.meta,
+      data: result.result,
+    };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getAdvertisementById(@Param('id') id: string) {

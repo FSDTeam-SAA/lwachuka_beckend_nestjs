@@ -141,6 +141,55 @@ export class AdvertisementService {
     return { result, meta: { total, limit, page } };
   }
 
+  async getVendorAdvertisement(
+    userId: string,
+    params: IFilterParams,
+    options: IOptions,
+  ) {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+    const { searchTerm, ...filterData } = params;
+
+    const andCondition: any[] = [];
+    const searchAbleFields = [
+      'companyName',
+      'advertisementType',
+      'targetRegions',
+      'targetAudience',
+      'compaingDuration',
+    ];
+
+    if (searchTerm) {
+      andCondition.push({
+        $or: searchAbleFields.map((field) => ({
+          [field]: { $regex: searchTerm, $options: 'i' },
+        })),
+      });
+    }
+
+    if (Object.keys(filterData).length > 0) {
+      andCondition.push({
+        $and: Object.entries(filterData).map(([key, value]) => ({
+          [key]: value,
+        })),
+      });
+    }
+
+    andCondition.push({
+      createdBy: userId,
+    });
+
+    const whereCondition =
+      andCondition.length > 0 ? { $and: andCondition } : {};
+    const result = await this.advertisementModel
+      .find(whereCondition)
+      .sort({ [sortBy]: sortOrder } as any)
+      .skip(skip)
+      .limit(limit)
+      .populate('createdBy');
+    const total = await this.advertisementModel.countDocuments(whereCondition);
+    return { result, meta: { total, limit, page } };
+  }
+
   async getAdvertisementById(id: string) {
     const result = await this.advertisementModel.findById(id);
     if (!result) throw new HttpException('Advertisement not found', 404);
