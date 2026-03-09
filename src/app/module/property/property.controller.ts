@@ -24,7 +24,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 
 @Controller('property')
 export class PropertyController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(private readonly propertyService: PropertyService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -216,16 +216,19 @@ export class PropertyController {
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('agent', 'admin'))
+  @UseInterceptors(FilesInterceptor('images', 10, fileUpload.uploadConfig))
   async updateProperty(
     @Req() req: Request,
     @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
     const userId = req.user!.id;
     const result = await this.propertyService.updateProperty(
       userId,
       id,
       updatePropertyDto,
+      files,
     );
 
     return {
