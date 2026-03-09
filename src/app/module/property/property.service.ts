@@ -17,7 +17,7 @@ export class PropertyService {
     private readonly propertyModel: mongoose.Model<Property>,
     @InjectModel(User.name)
     private readonly userModel: mongoose.Model<User>,
-  ) {}
+  ) { }
 
   async createProperty(
     userId: string,
@@ -228,11 +228,14 @@ export class PropertyService {
       }
     }
 
+    const existingImages = Array.isArray(payload.images) ? payload.images : [];
+
     if (files?.length) {
       const properityImage = await Promise.all(
         files.map((file) => fileUpload.uploadToCloudinary(file)),
       );
-      payload.images = properityImage.map((img) => img.url);
+      const newImages = properityImage.map((img) => img.url);
+      payload.images = [...existingImages, ...newImages];
     }
 
     const result = await this.propertyModel.findByIdAndUpdate(
