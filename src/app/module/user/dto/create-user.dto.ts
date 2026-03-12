@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsEmail, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'John' })
@@ -26,7 +36,10 @@ export class CreateUserDto {
   @IsString()
   profileImage?: string;
 
-  @ApiPropertyOptional({ enum: ['user', 'agent', 'vendor', 'admin'], example: 'user' })
+  @ApiPropertyOptional({
+    enum: ['user', 'agent', 'vendor', 'admin'],
+    example: 'user',
+  })
   @IsOptional()
   @IsEnum(['user', 'agent', 'vendor', 'admin'])
   role?: string;
