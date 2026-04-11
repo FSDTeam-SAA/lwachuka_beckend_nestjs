@@ -19,6 +19,42 @@ export class PropertyService {
     private readonly userModel: mongoose.Model<User>,
   ) {}
 
+  private buildFilterConditions(filterData: IFilterParams) {
+    const filterConditions: any[] = [];
+
+    Object.entries(filterData).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+
+      if (['bedrooms', 'bathrooms'].includes(key)) {
+        filterConditions.push({
+          [key]: Number(value),
+        });
+      } else if (['parking', 'gatedCommunity', 'staffQuarters'].includes(key)) {
+        filterConditions.push({
+          [key]: value === 'true' || value === true,
+        });
+      } else if (key === 'minLand') {
+        filterConditions.push({
+          landArea: { $gte: Number(value) },
+        });
+      } else if (key === 'maxLand') {
+        filterConditions.push({
+          landArea: { $lte: Number(value) },
+        });
+      } else if (key === 'price') {
+        filterConditions.push({
+          price: { $gte: Number(value) },
+        });
+      } else {
+        filterConditions.push({
+          [key]: value,
+        });
+      }
+    });
+
+    return filterConditions;
+  }
+
   async createProperty(
     userId: string,
     createPropertyDto: CreatePropertyDto,
@@ -65,19 +101,13 @@ export class PropertyService {
     const { searchTerm, ...filterData } = params;
 
     const andCondition: any[] = [];
+
     const searchAbleFields = [
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
       'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
@@ -95,11 +125,11 @@ export class PropertyService {
     }
 
     if (Object.keys(filterData).length > 0) {
-      andCondition.push({
-        $and: Object.entries(filterData).map(([key, value]) => ({
-          [key]: value,
-        })),
-      });
+      const filterConditions = this.buildFilterConditions(filterData);
+
+      if (filterConditions.length > 0) {
+        andCondition.push({ $and: filterConditions });
+      }
     }
 
     const whereConditions =
@@ -107,10 +137,13 @@ export class PropertyService {
 
     const result = await this.propertyModel
       .find(whereConditions)
-      .sort({ [sortBy]: sortOrder } as any)
+      .sort(
+        sortBy ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 } : { createdAt: -1 },
+      )
       .skip(skip)
       .limit(limit)
       .populate('createBy');
+
     const total = await this.propertyModel.countDocuments(whereConditions);
 
     return {
@@ -132,19 +165,13 @@ export class PropertyService {
     const { searchTerm, ...filterData } = params;
 
     const andCondition: any[] = [];
+
     const searchAbleFields = [
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
       'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
@@ -162,32 +189,39 @@ export class PropertyService {
     }
 
     if (Object.keys(filterData).length > 0) {
-      andCondition.push({
-        $and: Object.entries(filterData).map(([key, value]) => ({
-          [key]: value,
-        })),
-      });
+      const filterConditions = this.buildFilterConditions(filterData);
+
+      if (filterConditions.length > 0) {
+        andCondition.push({ $and: filterConditions });
+      }
     }
 
     const whereConditions =
       andCondition.length > 0 ? { $and: andCondition } : {};
 
-    const result = await this.propertyModel
+    let result = await this.propertyModel
       .find(whereConditions)
-      // .sort({ [sortBy]: sortOrder } as any)
       .skip(skip)
       .limit(limit)
       .populate('createBy');
+
     const total = await this.propertyModel.countDocuments(whereConditions);
 
-    result.sort((a, b) => {
-      const aSub = (a.createBy as unknown as User)?.isSubscribed ? 1 : 0;
-      const bSub = (b.createBy as unknown as User)?.isSubscribed ? 1 : 0;
-      if (bSub - aSub !== 0) {
-        return bSub - aSub;
+    result = result.sort((a: any, b: any) => {
+      const aSub = a.createBy?.isSubscribed ? 1 : 0;
+      const bSub = b.createBy?.isSubscribed ? 1 : 0;
+
+      if (bSub !== aSub) return bSub - aSub;
+
+      if (sortBy) {
+        const aVal = a[sortBy];
+        const bVal = b[sortBy];
+
+        if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
       }
-      if (sortOrder === 'asc') return a[sortBy] - b[sortBy];
-      else return b[sortBy] - a[sortBy];
+
+      return 0;
     });
 
     return {
@@ -272,24 +306,19 @@ export class PropertyService {
   ) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new HttpException('User not found', 404);
+
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
 
     const { searchTerm, ...filterData } = params;
 
-    const andCondition: any[] = [];
+    const andCondition: any[] = [{ createBy: userId }];
+
     const searchAbleFields = [
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
       'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
@@ -307,23 +336,21 @@ export class PropertyService {
     }
 
     if (Object.keys(filterData).length > 0) {
-      andCondition.push({
-        $and: Object.entries(filterData).map(([key, value]) => ({
-          [key]: value,
-        })),
-      });
+      const filterConditions = this.buildFilterConditions(filterData);
+
+      if (filterConditions.length > 0) {
+        andCondition.push({ $and: filterConditions });
+      }
     }
 
-    andCondition.push({ createBy: user._id });
-
-    const whereConditions =
-      andCondition.length > 0 ? { $and: andCondition } : {};
+    const whereConditions = { $and: andCondition };
 
     const result = await this.propertyModel
       .find(whereConditions)
       .sort({ [sortBy]: sortOrder } as any)
       .skip(skip)
       .limit(limit);
+
     const total = await this.propertyModel.countDocuments(whereConditions);
 
     return {
@@ -358,25 +385,21 @@ export class PropertyService {
       role: 'agent',
       isSubscribed: true,
     });
+
     const subscribedAgentIds = users.map((user) => user._id);
 
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper(options);
+
     const { searchTerm, ...filterData } = params;
 
-    const andCondition: any[] = [];
+    const andCondition: any[] = [{ createBy: { $in: subscribedAgentIds } }];
+
     const searchAbleFields = [
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
       'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
@@ -394,28 +417,25 @@ export class PropertyService {
     }
 
     if (Object.keys(filterData).length > 0) {
-      andCondition.push({
-        $and: Object.entries(filterData).map(([key, value]) => ({
-          [key]: value,
-        })),
-      });
+      const filterConditions = this.buildFilterConditions(filterData);
+
+      if (filterConditions.length > 0) {
+        andCondition.push({ $and: filterConditions });
+      }
     }
 
-    andCondition.push({
-      createBy: { $in: subscribedAgentIds },
-    });
-
-    const whereConditions =
-      andCondition.length > 0 ? { $and: andCondition } : {};
+    const whereConditions = { $and: andCondition };
 
     const result = await this.propertyModel
       .find(whereConditions)
-      .sort({ [sortBy]: sortOrder } as any)
+      .sort(
+        sortBy ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 } : { createdAt: -1 },
+      )
       .skip(skip)
       .limit(limit)
       .populate('createBy');
-    const total = await this.propertyModel.countDocuments(whereConditions);
 
+    const total = await this.propertyModel.countDocuments(whereConditions);
     return {
       data: result,
       meta: {

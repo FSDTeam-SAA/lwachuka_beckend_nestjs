@@ -8,49 +8,49 @@ export type UserDocument = User & Document;
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
-  firstName: string;
+  firstName!: string;
 
   @Prop()
-  lastName: string;
+  lastName!: string;
 
   @Prop({ required: true, unique: true })
-  email: string;
+  email!: string;
 
   @Prop({ required: true, select: false })
-  password: string;
+  password!: string;
 
   @Prop()
-  profileImage: string;
+  profileImage!: string;
 
   @Prop({ enum: ['user', 'agent', 'vendor', 'admin'], default: 'user' })
-  role: string;
+  role!: string;
 
   @Prop({ enum: ['male', 'female'] })
-  gender: string;
+  gender!: string;
 
   @Prop()
-  phoneNumber: string;
+  phoneNumber!: string;
 
   @Prop()
-  bio: string;
+  bio!: string;
 
   @Prop()
-  address: string;
+  address!: string;
 
   @Prop()
-  location: string;
+  location!: string;
 
   @Prop()
-  lat: number;
+  lat!: number;
 
   @Prop()
-  lng: number;
+  lng!: number;
 
   @Prop()
-  postCode: string;
+  postCode!: string;
 
   @Prop({ enum: ['active', 'block', 'pending'], default: 'pending' })
-  status: string;
+  status!: string;
 
   @Prop()
   otp?: string;
@@ -60,30 +60,30 @@ export class User {
 
   // default false
   @Prop({ default: false })
-  verifiedForget: boolean;
+  verifiedForget!: boolean;
 
   // optional
   @Prop()
-  stripeAccountId: string;
+  stripeAccountId!: string;
 
   // default false
   @Prop({ default: false })
-  isSubscribed: boolean;
+  isSubscribed!: boolean;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' })
-  subscribers: mongoose.Types.ObjectId;
+  subscribers!: mongoose.Types.ObjectId;
 
   @Prop()
-  subscriptionEndDate: Date;
+  subscriptionEndDate!: Date;
 
   @Prop()
-  expertise: string[];
+  expertise!: string[];
 
   @Prop()
-  serviceAreas: string[];
+  serviceAreas!: string[];
 
   @Prop()
-  experience: number;
+  experience!: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
