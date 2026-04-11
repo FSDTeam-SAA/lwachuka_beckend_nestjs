@@ -19,7 +19,6 @@ export class Property {
       'Duplex',
       'Condo',
       'Bungalow',
-      'Cottage',
       'Land',
     ],
     required: true,
@@ -127,6 +126,15 @@ export class Property {
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
   bookmarkUser: mongoose.Types.ObjectId[];
+
+  @Prop({ default: false })
+  parking: boolean;
+
+  @Prop({ default: false })
+  gatedCommunity: boolean;
+
+  @Prop({ default: false })
+  staffQuarters: boolean;
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property);

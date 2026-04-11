@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
@@ -23,7 +24,6 @@ export class CreatePropertyDto {
     'Duplex',
     'Condo',
     'Bungalow',
-    'Cottage',
     'Land',
   ])
   propertyType: string;
@@ -63,7 +63,21 @@ export class CreatePropertyDto {
   @IsNumber()
   plot?: number;
 
-  // ✅ Fixed naming according to model (key*)
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  parking?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  gatedCommunity?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  staffQuarters?: boolean;
+
   @IsOptional()
   @IsString()
   keyBathrooms?: string;
@@ -108,12 +122,15 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   description?: string;
-
   @IsOptional()
   @Transform(({ value }) => {
+    if (!value) return [];
     if (Array.isArray(value)) return value;
-    if (typeof value === 'string') return JSON.parse(value);
-    return [];
+    try {
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
   })
   @IsArray()
   propertyCommunityAmenities?: string[];
@@ -137,9 +154,9 @@ export class CreatePropertyDto {
 
   @IsOptional()
   @Transform(({ value }) => {
+    if (!value) return [];
     if (Array.isArray(value)) return value;
-    if (typeof value === 'string') return [value];
-    return [];
+    return [value];
   })
   @IsArray()
   @ApiProperty({
@@ -148,7 +165,6 @@ export class CreatePropertyDto {
     required: false,
   })
   images?: string[];
-  // images?: string[];
 
   @IsOptional()
   @IsString()

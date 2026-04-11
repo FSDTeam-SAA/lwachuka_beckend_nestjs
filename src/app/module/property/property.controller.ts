@@ -12,6 +12,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  applyDecorators,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
@@ -27,8 +28,83 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+
+const ApiPropertyListQueries = () =>
+  applyDecorators(
+    ApiQuery({
+      name: 'searchTerm',
+      required: false,
+      type: String,
+      example: 'apartment',
+    }),
+    ApiQuery({ name: 'title', required: false, type: String }),
+    ApiQuery({
+      name: 'listingType',
+      required: false,
+      enum: ['For Sale', 'For Rent'],
+    }),
+    ApiQuery({
+      name: 'propertyType',
+      required: false,
+      enum: [
+        'Apartment',
+        'Studio',
+        'Penthouse',
+        'Duplex',
+        'Condo',
+        'Bungalow',
+        'Land',
+      ],
+    }),
+    ApiQuery({ name: 'location', required: false, type: String }),
+    ApiQuery({ name: 'purpose', required: false, type: String }),
+    ApiQuery({ name: 'referenceNumber', required: false, type: String }),
+    ApiQuery({
+      name: 'status',
+      required: false,
+      enum: ['pending', 'approved', 'rejected'],
+    }),
+    ApiQuery({
+      name: 'price',
+      required: false,
+      type: Number,
+      description: 'Minimum price',
+    }),
+    ApiQuery({
+      name: 'bedrooms',
+      required: false,
+      type: Number,
+      description: 'Exact bedrooms',
+    }),
+    ApiQuery({
+      name: 'bathrooms',
+      required: false,
+      type: Number,
+      description: 'Exact bathrooms',
+    }),
+    ApiQuery({ name: 'parking', required: false, type: Boolean }),
+    ApiQuery({ name: 'gatedCommunity', required: false, type: Boolean }),
+    ApiQuery({ name: 'staffQuarters', required: false, type: Boolean }),
+    ApiQuery({ name: 'minLand', required: false, type: Number }),
+    ApiQuery({ name: 'maxLand', required: false, type: Number }),
+    ApiQuery({ name: 'page', required: false, type: Number, example: 1 }),
+    ApiQuery({ name: 'limit', required: false, type: Number, example: 10 }),
+    ApiQuery({
+      name: 'sortBy',
+      required: false,
+      type: String,
+      example: 'createdAt',
+    }),
+    ApiQuery({
+      name: 'sortOrder',
+      required: false,
+      enum: ['asc', 'desc'],
+      example: 'desc',
+    }),
+  );
 
 @ApiTags('property')
 @Controller('property')
@@ -64,25 +140,25 @@ export class PropertyController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all properties' })
+  @ApiPropertyListQueries()
   async getAllProperties(@Req() req: Request) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
-      'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
       'price',
+      'bedrooms',
+      'bathrooms',
+      'parking',
+      'gatedCommunity',
+      'staffQuarters',
+      'minLand',
+      'maxLand',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllProperty(filters, options);
@@ -97,25 +173,25 @@ export class PropertyController {
   @Get('get-all-pad-property-listing')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all paid property listings' })
+  @ApiPropertyListQueries()
   async getAllPadPropertyListing(@Req() req: Request) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
-      'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
       'price',
+      'bedrooms',
+      'bathrooms',
+      'parking',
+      'gatedCommunity',
+      'staffQuarters',
+      'minLand',
+      'maxLand',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllPadPropertyListing(
@@ -133,24 +209,25 @@ export class PropertyController {
   @Get('subscriber-property-top')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get top subscriber properties' })
+  @ApiPropertyListQueries()
   async getAllSubscriberUserPropertyTop(@Req() req: Request) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
-      'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
+      'price',
+      'bedrooms',
+      'bathrooms',
+      'parking',
+      'gatedCommunity',
+      'staffQuarters',
+      'minLand',
+      'maxLand',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getAllSubscriberUserPropertyTop(
@@ -170,24 +247,25 @@ export class PropertyController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get my properties' })
+  @ApiPropertyListQueries()
   async getMyPropertys(@Req() req: Request) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
-      'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
+      'price',
+      'bedrooms',
+      'bathrooms',
+      'parking',
+      'gatedCommunity',
+      'staffQuarters',
+      'minLand',
+      'maxLand',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getMyAgentProperty(
@@ -207,24 +285,25 @@ export class PropertyController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get properties by agent id' })
   @ApiParam({ name: 'agentId', description: 'Agent id' })
+  @ApiPropertyListQueries()
   async agentProperty(@Req() req: Request, @Param('agentId') agentId: string) {
     const filters = pick(req.query, [
       'searchTerm',
       'title',
       'listingType',
       'propertyType',
-      'kitchenType',
       'location',
-      'finishes',
-      'balconyType',
-      'storage',
-      'coolingSystem',
-      'moveInStatus',
-      'description',
-      'propertyCommunityAmenities',
       'purpose',
       'referenceNumber',
       'status',
+      'price',
+      'bedrooms',
+      'bathrooms',
+      'parking',
+      'gatedCommunity',
+      'staffQuarters',
+      'minLand',
+      'maxLand',
     ]);
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
     const result = await this.propertyService.getMyAgentProperty(
