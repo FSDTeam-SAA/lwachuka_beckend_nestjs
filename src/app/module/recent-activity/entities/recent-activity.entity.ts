@@ -12,7 +12,7 @@ export class RecentActivity {
   property?: mongoose.Types.ObjectId;
 
   @Prop({
-    enum: ['saved_property', 'inquiry_sent', 'site_visit_booked'],
+    enum: ['saved_property', 'new_inquiry', 'site_visit_booked'],
     required: true,
   })
   activityType!: string;
