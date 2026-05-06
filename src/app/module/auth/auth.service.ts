@@ -12,6 +12,10 @@ import {
   Loginhistory,
   LoginhistoryDocument,
 } from '../loginhistory/entities/loginhistory.entity';
+import {
+  getAdminNotificationTemplate,
+  getWelcomeEmailTemplate,
+} from 'src/app/utils/email-templates';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +44,19 @@ export class AuthService {
       lastName,
     });
     if (!result) throw new HttpException('Register failed', 400);
+
+    await sendMailer(
+      result.email,
+      'Welcome to Our Service 🎉',
+      getWelcomeEmailTemplate(result.firstName, result.email),
+    );
+
+    await sendMailer(
+      config.email.admin!,
+      'New User Registered - Our Service',
+      getAdminNotificationTemplate(result),
+    );
+
     return result;
   }
 
