@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './entities/user.entity';
+import { User, UserDocument } from './entities/user.entity';
 import mongoose from 'mongoose';
 import { fileUpload } from 'src/app/helper/fileUploder';
 import { getLatLngFromAddress } from 'src/app/helper/geocode';
@@ -11,6 +11,12 @@ import {
   Property,
   PropertyDocument,
 } from '../property/entities/property.entity';
+import sendMailer from 'src/app/helper/sendMailer';
+import {
+  getAccountApprovedTemplate,
+  getAccountRejectedTemplate,
+  getProfileUpdateTemplate,
+} from 'src/app/utils/email-templates';
 
 @Injectable()
 export class UserService {
@@ -223,8 +229,8 @@ export class UserService {
   }
 
   async getSingleUser(id: string) {
-    const user = await this.userModel.findById(id)
-    if(!user){
+    const user = await this.userModel.findById(id);
+    if (!user) {
       throw new HttpException('User not found', 404);
     }
 
@@ -289,28 +295,71 @@ export class UserService {
     const isExist = await this.userModel.findById(id);
     if (!isExist) throw new HttpException('User not found', 404);
 
+    // Handle profile image upload
     if (file) {
       const profileImage = await fileUpload.uploadToCloudinary(file);
       payload.profileImage = profileImage.url;
     }
-    const fullAddress = `${payload.location || ''} ${payload.address || ''}`;
+
+    // Handle address to coordinates
+    const fullAddress =
+      `${payload.location || ''} ${payload.address || ''}`.trim();
     let lat: number | null = null;
     let lng: number | null = null;
 
-    if (fullAddress.trim()) {
+    if (fullAddress) {
       const coords = await getLatLngFromAddress(fullAddress);
       lat = coords.lat;
       lng = coords.lng;
     }
 
+    const oldStatus = isExist.status;
+    const newStatus = payload.status;
+
+    // Perform update
     const result = await this.userModel.findByIdAndUpdate(
       id,
-      { ...payload, lat: lat ?? undefined, lng: lng ?? undefined },
       {
-        new: true,
+        ...payload,
+        lat: lat ?? undefined,
+        lng: lng ?? undefined,
       },
+      { new: true },
     );
+
+    if (!result) throw new HttpException('Update failed', 400);
+
+    // Send status change email if status was modified
+    if (newStatus && newStatus !== oldStatus) {
+      await this.sendStatusChangeEmail(result);
+    }
+    // Send general profile update email (optional)
+    else {
+      await sendMailer(
+        result.email,
+        'Profile Updated Successfully',
+        getProfileUpdateTemplate(result.firstName),
+      );
+    }
+
     return result;
+  }
+
+  private async sendStatusChangeEmail(user: UserDocument) {
+    let subject = '';
+    let html = '';
+
+    if (user.status === 'active') {
+      subject = '✅ Your Account Has Been Approved';
+      html = getAccountApprovedTemplate(user.firstName);
+    } else if (user.status === 'block') {
+      subject = '🚫 Your Account Has Been Suspended';
+      html = getAccountRejectedTemplate(user.firstName, 'suspended');
+    }
+
+    if (html) {
+      await sendMailer(user.email, subject, html);
+    }
   }
 
   async deleteUser(id: string) {
